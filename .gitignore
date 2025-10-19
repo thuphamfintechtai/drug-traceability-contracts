@@ -1,15 +1,26 @@
-# Remix compiler artifacts
-**/artifacts/
-**/artifacts/**
+# Node modules
+node_modules/
 
-# Remix plugin state folders
-deps/
-states/
+# Hardhat artifacts and cache
+artifacts/
+cache/
 
-# Debug info
-*.dbg.json
-*.tsbuildinfo
+# Ignition deployment files (if using Hardhat Ignition)
+ignition/deployments/
 
-# Optional
+# Local environment variables
 .env
-.env.local
+.env.*
+
+# Test reports and coverage
+coverage/
+coverage.json
+
+# Development network files (e.g., Hardhat Network's chain data)
+hardhat-network-config.json
+
+# IDE and OS generated files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
