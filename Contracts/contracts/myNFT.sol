@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./drugContract.sol";
 
-contract MyNFT is  drugContractService, ERC721URIStorage, Ownable{
+contract MyNFT is  drugContractService, ERC721URIStorage{
     uint256 private _tokenIds;
 
     drugContractService drugContractServiceHelper;
@@ -15,7 +15,7 @@ contract MyNFT is  drugContractService, ERC721URIStorage, Ownable{
 
     // Truyền vào địa chỉ của Ví để thêm vào 
 
-    constructor(address initialOwner) ERC721("MyNFT", "NFT") Ownable(initialOwner) {
+    constructor(address initialOwner) ERC721("MyNFT", "NFT") onlyOwner {
         drugContractServiceHelper = drugContractService(initialOwner);
     }
 
@@ -35,10 +35,10 @@ contract MyNFT is  drugContractService, ERC721URIStorage, Ownable{
 
     function TransferDistributorToPharmacy(uint256 tokenId , address _Distributor) public onlyDistributor
     {
-        drugContractServiceHelper.tokenIdTravelInfos[tokenId] = _Distributor;
+        tokenIdTravelInfos[tokenId] = _Distributor;
     }
 
     function TransferManufactureToDistributor(uint256 tokenId , address _Manufacture) public onlyManufacture{
-        drugContractServiceHelper.tokenIdTravelInfos[tokenId] = _Manufacture;
+        tokenIdTravelInfos[tokenId] = _Manufacture;
     }
 }
