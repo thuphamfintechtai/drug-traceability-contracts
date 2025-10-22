@@ -2,26 +2,46 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./drugContract.sol";
+import "./accessControl.sol";
 
-contract MyNFT is  drugContractService, ERC721URIStorage{
+import "./libraries/structsLibrary.sol";
+
+contract MyNFT  is ERC721URIStorage{
+
+    /*              VARIBLES        */
+
     uint256 private _tokenIds;
 
-    drugContractService drugContractServiceHelper;
+    accessControlService public accessControlServiceObj;
+
+    bytes32 public ManufactorByte = keccak256("Manufactor");
+
+    bytes32 public DistributorByte = keccak256("Distributor");
+
+    bytes32 public PharmacyByte = keccak256("Pharmacy");
+
+    /*              EVENTS              */
 
     event TrackingEvent(address _Distributor , uint256);
 
-    // Truyền vào địa chỉ của Ví để thêm vào 
+    /*              MAPPINGS            */
 
-    constructor(address initialOwner) ERC721("MyNFT", "NFT") onlyOwner {
-        drugContractServiceHelper = drugContractService(initialOwner);
+    mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
+
+    /*              CONTRUCTOR          */
+
+    constructor(address initialOwner) ERC721("MyNFT", "NFT"){
+        accessControlServiceObj = accessControlService(initialOwner);
     }
+
+
+    /*              MINT NFT           */
+
+
 
     function mintNFT(address recipient, string memory tokenURI)
         public
-        onlyOwner
         returns (uint256)
     {
         _tokenIds++;
@@ -33,12 +53,33 @@ contract MyNFT is  drugContractService, ERC721URIStorage{
         return newItemId;
     }
 
-    function TransferDistributorToPharmacy(uint256 tokenId , address _Distributor) public onlyDistributor
+
+    /*           MANUFACTOR TO DISTRIBUTOR                  */
+
+    function manufactorToDistributor(uint256 tokenId ,address distributorAddress) public
     {
-        tokenIdTravelInfos[tokenId] = _Distributor;
+
+        // Checking For If It's Valid Distributor Addreess
+
+        require(accessControlServiceObj.checkIsManufactor(msg.sender) , "Invalid Role");
+
+
+        require(accessControlServiceObj.checkManufactorAuthorityDistributor(distributorAddress)
+        , "Error Invalid Authority"); 
+
+
+        tokenIdTravelInfos[tokenId].push(AddressTracking(
+            ManufactorByte,
+            DistributorByte,
+            msg.sender,
+            distributorAddress ,
+            block.timestamp
+        ));
     }
 
-    function TransferManufactureToDistributor(uint256 tokenId , address _Manufacture) public onlyManufacture{
-        tokenIdTravelInfos[tokenId] = _Manufacture;
-    }
+
+
+
+
+
 }
