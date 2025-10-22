@@ -9,9 +9,25 @@ import "./libraries/structsLibrary.sol";
 
 contract MyNFT  is ERC721URIStorage{
 
+    /*              CONTRUCTOR          */
+
+    constructor(address initialOwner) ERC721("MyNFT", "NFT"){
+        accessControlServiceObj = accessControlService(initialOwner);
+    }
+
+    /*                 EVENTS             */
+
+    event manufactorToDistributorEvent(address manufactorAddress , address DistributorAddress , uint recivedtimeSpan);
+
+
+    event distributorToPharmacyEvent(address distributorAddress , address pharmacyAddress , uint recivedtimeSpan);
+
     /*              VARIBLES        */
 
     uint256 private _tokenIds;
+
+
+    /*            BYTES ROLES              */
 
     accessControlService public accessControlServiceObj;
 
@@ -28,12 +44,6 @@ contract MyNFT  is ERC721URIStorage{
     /*              MAPPINGS            */
 
     mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
-
-    /*              CONTRUCTOR          */
-
-    constructor(address initialOwner) ERC721("MyNFT", "NFT"){
-        accessControlServiceObj = accessControlService(initialOwner);
-    }
 
 
     /*              MINT NFT           */
@@ -56,7 +66,7 @@ contract MyNFT  is ERC721URIStorage{
 
     /*           MANUFACTOR TO DISTRIBUTOR                  */
 
-    function manufactorToDistributor(uint256 tokenId ,address distributorAddress) public
+    function manufactorToDistributorFun(uint256 tokenId ,address distributorAddress) public
     {
 
         // Checking For If It's Valid Distributor Addreess
@@ -65,7 +75,7 @@ contract MyNFT  is ERC721URIStorage{
 
 
         require(accessControlServiceObj.checkManufactorAuthorityDistributor(distributorAddress)
-        , "Error Invalid Authority"); 
+        , "Error Invalid Authority Wallet Address"); 
 
 
         tokenIdTravelInfos[tokenId].push(AddressTracking(
@@ -75,11 +85,39 @@ contract MyNFT  is ERC721URIStorage{
             distributorAddress ,
             block.timestamp
         ));
+
+        // Emit Event
+
+        emit manufactorToDistributorEvent(msg.sender , distributorAddress , block.timestamp);
     }
 
 
+    /*                DISTRIBUTOR TO PHARMACY                  */
 
 
+
+    function DistributorToPharmacyFun(uint256 tokenId ,address PharmacyAddress) public
+    {
+
+        // Checking For If It's Valid Distributor Addreess
+
+        require(accessControlServiceObj.checkIsDistributor(msg.sender) , "Invalid Role");
+
+
+        require(accessControlServiceObj.checkDistributorAuthorityPharmacy(PharmacyAddress)
+        , "Error Invalid Authority Wallet Address"); 
+
+
+        tokenIdTravelInfos[tokenId].push(AddressTracking(
+            DistributorByte,
+            PharmacyByte,
+            msg.sender,
+            PharmacyAddress ,
+            block.timestamp
+        ));
+
+        emit distributorToPharmacyEvent(msg.sender, PharmacyAddress, block.timestamp);
+    }
 
 
 }

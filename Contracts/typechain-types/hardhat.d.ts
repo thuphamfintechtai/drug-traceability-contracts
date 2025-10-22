@@ -70,13 +70,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
     getContractFactory(
-      name: "DrugContractService",
+      name: "AccessControlService",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DrugContractService__factory>;
-    getContractFactory(
-      name: "UserType",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UserType__factory>;
+    ): Promise<Contracts.AccessControlService__factory>;
     getContractFactory(
       name: "MyNFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -153,15 +149,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
     getContractAt(
-      name: "DrugContractService",
+      name: "AccessControlService",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.DrugContractService>;
-    getContractAt(
-      name: "UserType",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.UserType>;
+    ): Promise<Contracts.AccessControlService>;
     getContractAt(
       name: "MyNFT",
       address: string | ethers.Addressable,
@@ -225,13 +216,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
-      name: "DrugContractService",
+      name: "AccessControlService",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.DrugContractService>;
-    deployContract(
-      name: "UserType",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UserType>;
+    ): Promise<Contracts.AccessControlService>;
     deployContract(
       name: "MyNFT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -308,15 +295,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
-      name: "DrugContractService",
+      name: "AccessControlService",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.DrugContractService>;
-    deployContract(
-      name: "UserType",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UserType>;
+    ): Promise<Contracts.AccessControlService>;
     deployContract(
       name: "MyNFT",
       args: any[],
