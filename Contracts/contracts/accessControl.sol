@@ -7,21 +7,21 @@ import "./libraries/structsLibrary.sol";
 
 contract accessControlService{
 
-                    /*           CONTRUCTOR           */
+    /*           CONTRUCTOR           */
 
     constructor(){
        owner = msg.sender;
     }
 
-                /*             EVENTS           */
+    /*             EVENTS           */
     
-                        /*     Permission Events     */
+        /*     Permission Events     */
 
     event grantPermissonEvent(address granter, address reciver);
 
     event PermissionRemoveEvent(address granter , address reciver);
 
-                        /*       Authority Events     */
+        /*       Authority Events     */
 
     event manufactureAuthorityEvent(address ManufactorAddress , address DistributorAddress);
 
@@ -31,7 +31,7 @@ contract accessControlService{
 
     event distributorUnauthorityEvent(address DistributorAddress , address PharmacyAddress);
 
-                /*            MAPPING             */
+    /*            MAPPING             */
 
     mapping(address => bool) public isManufacture;
 
@@ -176,7 +176,7 @@ contract accessControlService{
 
 
 
-    /*          CHECK IF THE ROLE IS VALID OR NOT           */
+    /*          CHECK IF THE AUTHORITY IS VALID OR NOT           */
 
 
     function checkManufactorAuthorityDistributor(address _DistributorAddress) public view returns(bool){
@@ -194,5 +194,4 @@ contract accessControlService{
             return false;
         }
     }
-
 }

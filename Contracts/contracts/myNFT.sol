@@ -7,7 +7,12 @@ import "./accessControl.sol";
 
 import "./libraries/structsLibrary.sol";
 
-contract MyNFT  is ERC721URIStorage{
+contract MyNFT is ERC721URIStorage{
+
+    /*      ACCESS CONTROL SERVICE VARIBLE      */
+
+    accessControlService public accessControlServiceObj;
+
 
     /*              CONTRUCTOR          */
 
@@ -15,7 +20,7 @@ contract MyNFT  is ERC721URIStorage{
         accessControlServiceObj = accessControlService(initialOwner);
     }
 
-    /*                 EVENTS             */
+    /*              EVENTS             */
 
     event manufactorToDistributorEvent(address manufactorAddress , address DistributorAddress , uint recivedtimeSpan);
 
@@ -27,9 +32,8 @@ contract MyNFT  is ERC721URIStorage{
     uint256 private _tokenIds;
 
 
-    /*            BYTES ROLES              */
 
-    accessControlService public accessControlServiceObj;
+    /*            BYTES ROLES              */
 
     bytes32 public ManufactorByte = keccak256("Manufactor");
 
@@ -49,15 +53,20 @@ contract MyNFT  is ERC721URIStorage{
     /*              MINT NFT           */
 
 
-
-    function mintNFT(address recipient, string memory tokenURI)
+    function mintNFT(string memory tokenURI)
         public
         returns (uint256)
     {
+
+        require(accessControlServiceObj.checkIsManufactor(msg.sender) , "You Don't Have Permisson To Call This Function");
+        // TOKEN uri sẽ là IPFS LÀ SỐ LÔ , .... 
+
         _tokenIds++;
 
         uint256 newItemId = _tokenIds;
-        _mint(recipient, newItemId);
+        
+        _mint(msg.sender, newItemId);
+
         _setTokenURI(newItemId, tokenURI);
 
         return newItemId;
@@ -66,7 +75,9 @@ contract MyNFT  is ERC721URIStorage{
 
     /*           MANUFACTOR TO DISTRIBUTOR                  */
 
-    function manufactorToDistributorFun(uint256 tokenId ,address distributorAddress) public
+    function manufactorToDistributorFun(
+        uint256 tokenId ,
+        address distributorAddress) public
     {
 
         // Checking For If It's Valid Distributor Addreess
@@ -96,7 +107,9 @@ contract MyNFT  is ERC721URIStorage{
 
 
 
-    function DistributorToPharmacyFun(uint256 tokenId ,address PharmacyAddress) public
+    function DistributorToPharmacyFun(
+        uint256 tokenId ,
+        address PharmacyAddress) public
     {
 
         // Checking For If It's Valid Distributor Addreess
@@ -118,6 +131,13 @@ contract MyNFT  is ERC721URIStorage{
 
         emit distributorToPharmacyEvent(msg.sender, PharmacyAddress, block.timestamp);
     }
+
+
+    /*
+
+        Cấu trúc 
+
+    */
 
 
 }
