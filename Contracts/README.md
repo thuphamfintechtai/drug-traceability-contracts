@@ -11,3 +11,30 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.ts
 ```
+
+## Cách compile Contract
+
+```shell
+cd Contracts 
+npx hardhat compile
+```
+
+## Cách test contract 
+
+```shell
+cd Contracts 
+npx hardhat test
+```
+
+
+## Cách Deploy Contract lên mạng của Pione zero Chain 
+
+
+```shell
+cd Contracts 
+npx hardhat ignition deploy ./ignition/modules/deploy.ts --network pione
+```
+
+
+
+
