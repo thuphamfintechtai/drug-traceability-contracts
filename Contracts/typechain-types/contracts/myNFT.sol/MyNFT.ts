@@ -23,19 +23,39 @@ import type {
   TypedContractMethod,
 } from "../../common";
 
+export type AddressTrackingStruct = {
+  fromUserType: BytesLike;
+  toUserType: BytesLike;
+  fromUserAddress: AddressLike;
+  toUserAddress: AddressLike;
+  recivedtimeSpan: BigNumberish;
+};
+
+export type AddressTrackingStructOutput = [
+  fromUserType: string,
+  toUserType: string,
+  fromUserAddress: string,
+  toUserAddress: string,
+  recivedtimeSpan: bigint
+] & {
+  fromUserType: string;
+  toUserType: string;
+  fromUserAddress: string;
+  toUserAddress: string;
+  recivedtimeSpan: bigint;
+};
+
 export interface MyNFTInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "DistributorByte"
-      | "DistributorToPharmacyFun"
-      | "ManufactorByte"
-      | "PharmacyByte"
       | "accessControlServiceObj"
       | "approve"
       | "balanceOf"
+      | "distributorToPharmacy"
       | "getApproved"
+      | "getTrackingHistory"
       | "isApprovedForAll"
-      | "manufactorToDistributorFun"
+      | "manufacturerToDistributor"
       | "mintNFT"
       | "name"
       | "ownerOf"
@@ -54,29 +74,12 @@ export interface MyNFTInterface extends Interface {
       | "Approval"
       | "ApprovalForAll"
       | "BatchMetadataUpdate"
+      | "DistributorToPharmacy"
+      | "ManufacturerToDistributor"
       | "MetadataUpdate"
-      | "TrackingEvent"
       | "Transfer"
-      | "distributorToPharmacyEvent"
-      | "manufactorToDistributorEvent"
   ): EventFragment;
 
-  encodeFunctionData(
-    functionFragment: "DistributorByte",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "DistributorToPharmacyFun",
-    values: [BigNumberish, AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ManufactorByte",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "PharmacyByte",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "accessControlServiceObj",
     values?: undefined
@@ -90,7 +93,15 @@ export interface MyNFTInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "distributorToPharmacy",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getApproved",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTrackingHistory",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -98,13 +109,10 @@ export interface MyNFTInterface extends Interface {
     values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "manufactorToDistributorFun",
+    functionFragment: "manufacturerToDistributor",
     values: [BigNumberish, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "mintNFT",
-    values: [AddressLike, string]
-  ): string;
+  encodeFunctionData(functionFragment: "mintNFT", values: [string]): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
@@ -141,29 +149,21 @@ export interface MyNFTInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "DistributorByte",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "DistributorToPharmacyFun",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "ManufactorByte",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "PharmacyByte",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "accessControlServiceObj",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "distributorToPharmacy",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getApproved",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTrackingHistory",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -171,7 +171,7 @@ export interface MyNFTInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "manufactorToDistributorFun",
+    functionFragment: "manufacturerToDistributor",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "mintNFT", data: BytesLike): Result;
@@ -261,11 +261,24 @@ export namespace BatchMetadataUpdateEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace MetadataUpdateEvent {
-  export type InputTuple = [_tokenId: BigNumberish];
-  export type OutputTuple = [_tokenId: bigint];
+export namespace DistributorToPharmacyEvent {
+  export type InputTuple = [
+    distributorAddress: AddressLike,
+    pharmacyAddress: AddressLike,
+    tokenId: BigNumberish,
+    receivedTimestamp: BigNumberish
+  ];
+  export type OutputTuple = [
+    distributorAddress: string,
+    pharmacyAddress: string,
+    tokenId: bigint,
+    receivedTimestamp: bigint
+  ];
   export interface OutputObject {
-    _tokenId: bigint;
+    distributorAddress: string;
+    pharmacyAddress: string;
+    tokenId: bigint;
+    receivedTimestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -273,12 +286,36 @@ export namespace MetadataUpdateEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace TrackingEventEvent {
-  export type InputTuple = [_Distributor: AddressLike, arg1: BigNumberish];
-  export type OutputTuple = [_Distributor: string, arg1: bigint];
+export namespace ManufacturerToDistributorEvent {
+  export type InputTuple = [
+    manufacturerAddress: AddressLike,
+    distributorAddress: AddressLike,
+    tokenId: BigNumberish,
+    receivedTimestamp: BigNumberish
+  ];
+  export type OutputTuple = [
+    manufacturerAddress: string,
+    distributorAddress: string,
+    tokenId: bigint,
+    receivedTimestamp: bigint
+  ];
   export interface OutputObject {
-    _Distributor: string;
-    arg1: bigint;
+    manufacturerAddress: string;
+    distributorAddress: string;
+    tokenId: bigint;
+    receivedTimestamp: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace MetadataUpdateEvent {
+  export type InputTuple = [_tokenId: BigNumberish];
+  export type OutputTuple = [_tokenId: bigint];
+  export interface OutputObject {
+    _tokenId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -297,50 +334,6 @@ export namespace TransferEvent {
     from: string;
     to: string;
     tokenId: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace distributorToPharmacyEventEvent {
-  export type InputTuple = [
-    distributorAddress: AddressLike,
-    pharmacyAddress: AddressLike,
-    recivedtimeSpan: BigNumberish
-  ];
-  export type OutputTuple = [
-    distributorAddress: string,
-    pharmacyAddress: string,
-    recivedtimeSpan: bigint
-  ];
-  export interface OutputObject {
-    distributorAddress: string;
-    pharmacyAddress: string;
-    recivedtimeSpan: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace manufactorToDistributorEventEvent {
-  export type InputTuple = [
-    manufactorAddress: AddressLike,
-    DistributorAddress: AddressLike,
-    recivedtimeSpan: BigNumberish
-  ];
-  export type OutputTuple = [
-    manufactorAddress: string,
-    DistributorAddress: string,
-    recivedtimeSpan: bigint
-  ];
-  export interface OutputObject {
-    manufactorAddress: string;
-    DistributorAddress: string;
-    recivedtimeSpan: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -391,18 +384,6 @@ export interface MyNFT extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  DistributorByte: TypedContractMethod<[], [string], "view">;
-
-  DistributorToPharmacyFun: TypedContractMethod<
-    [tokenId: BigNumberish, PharmacyAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-
-  ManufactorByte: TypedContractMethod<[], [string], "view">;
-
-  PharmacyByte: TypedContractMethod<[], [string], "view">;
-
   accessControlServiceObj: TypedContractMethod<[], [string], "view">;
 
   approve: TypedContractMethod<
@@ -413,7 +394,19 @@ export interface MyNFT extends BaseContract {
 
   balanceOf: TypedContractMethod<[owner: AddressLike], [bigint], "view">;
 
+  distributorToPharmacy: TypedContractMethod<
+    [tokenId: BigNumberish, pharmacyAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   getApproved: TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
+
+  getTrackingHistory: TypedContractMethod<
+    [tokenId: BigNumberish],
+    [AddressTrackingStructOutput[]],
+    "view"
+  >;
 
   isApprovedForAll: TypedContractMethod<
     [owner: AddressLike, operator: AddressLike],
@@ -421,17 +414,13 @@ export interface MyNFT extends BaseContract {
     "view"
   >;
 
-  manufactorToDistributorFun: TypedContractMethod<
+  manufacturerToDistributor: TypedContractMethod<
     [tokenId: BigNumberish, distributorAddress: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  mintNFT: TypedContractMethod<
-    [recipient: AddressLike, tokenURI: string],
-    [bigint],
-    "nonpayable"
-  >;
+  mintNFT: TypedContractMethod<[tokenURI: string], [bigint], "nonpayable">;
 
   name: TypedContractMethod<[], [string], "view">;
 
@@ -495,22 +484,6 @@ export interface MyNFT extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "DistributorByte"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "DistributorToPharmacyFun"
-  ): TypedContractMethod<
-    [tokenId: BigNumberish, PharmacyAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "ManufactorByte"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "PharmacyByte"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "accessControlServiceObj"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
@@ -524,8 +497,22 @@ export interface MyNFT extends BaseContract {
     nameOrSignature: "balanceOf"
   ): TypedContractMethod<[owner: AddressLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "distributorToPharmacy"
+  ): TypedContractMethod<
+    [tokenId: BigNumberish, pharmacyAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "getApproved"
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "getTrackingHistory"
+  ): TypedContractMethod<
+    [tokenId: BigNumberish],
+    [AddressTrackingStructOutput[]],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "isApprovedForAll"
   ): TypedContractMethod<
@@ -534,7 +521,7 @@ export interface MyNFT extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "manufactorToDistributorFun"
+    nameOrSignature: "manufacturerToDistributor"
   ): TypedContractMethod<
     [tokenId: BigNumberish, distributorAddress: AddressLike],
     [void],
@@ -542,11 +529,7 @@ export interface MyNFT extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "mintNFT"
-  ): TypedContractMethod<
-    [recipient: AddressLike, tokenURI: string],
-    [bigint],
-    "nonpayable"
-  >;
+  ): TypedContractMethod<[tokenURI: string], [bigint], "nonpayable">;
   getFunction(
     nameOrSignature: "name"
   ): TypedContractMethod<[], [string], "view">;
@@ -633,6 +616,20 @@ export interface MyNFT extends BaseContract {
     BatchMetadataUpdateEvent.OutputObject
   >;
   getEvent(
+    key: "DistributorToPharmacy"
+  ): TypedContractEvent<
+    DistributorToPharmacyEvent.InputTuple,
+    DistributorToPharmacyEvent.OutputTuple,
+    DistributorToPharmacyEvent.OutputObject
+  >;
+  getEvent(
+    key: "ManufacturerToDistributor"
+  ): TypedContractEvent<
+    ManufacturerToDistributorEvent.InputTuple,
+    ManufacturerToDistributorEvent.OutputTuple,
+    ManufacturerToDistributorEvent.OutputObject
+  >;
+  getEvent(
     key: "MetadataUpdate"
   ): TypedContractEvent<
     MetadataUpdateEvent.InputTuple,
@@ -640,32 +637,11 @@ export interface MyNFT extends BaseContract {
     MetadataUpdateEvent.OutputObject
   >;
   getEvent(
-    key: "TrackingEvent"
-  ): TypedContractEvent<
-    TrackingEventEvent.InputTuple,
-    TrackingEventEvent.OutputTuple,
-    TrackingEventEvent.OutputObject
-  >;
-  getEvent(
     key: "Transfer"
   ): TypedContractEvent<
     TransferEvent.InputTuple,
     TransferEvent.OutputTuple,
     TransferEvent.OutputObject
-  >;
-  getEvent(
-    key: "distributorToPharmacyEvent"
-  ): TypedContractEvent<
-    distributorToPharmacyEventEvent.InputTuple,
-    distributorToPharmacyEventEvent.OutputTuple,
-    distributorToPharmacyEventEvent.OutputObject
-  >;
-  getEvent(
-    key: "manufactorToDistributorEvent"
-  ): TypedContractEvent<
-    manufactorToDistributorEventEvent.InputTuple,
-    manufactorToDistributorEventEvent.OutputTuple,
-    manufactorToDistributorEventEvent.OutputObject
   >;
 
   filters: {
@@ -702,6 +678,28 @@ export interface MyNFT extends BaseContract {
       BatchMetadataUpdateEvent.OutputObject
     >;
 
+    "DistributorToPharmacy(address,address,uint256,uint256)": TypedContractEvent<
+      DistributorToPharmacyEvent.InputTuple,
+      DistributorToPharmacyEvent.OutputTuple,
+      DistributorToPharmacyEvent.OutputObject
+    >;
+    DistributorToPharmacy: TypedContractEvent<
+      DistributorToPharmacyEvent.InputTuple,
+      DistributorToPharmacyEvent.OutputTuple,
+      DistributorToPharmacyEvent.OutputObject
+    >;
+
+    "ManufacturerToDistributor(address,address,uint256,uint256)": TypedContractEvent<
+      ManufacturerToDistributorEvent.InputTuple,
+      ManufacturerToDistributorEvent.OutputTuple,
+      ManufacturerToDistributorEvent.OutputObject
+    >;
+    ManufacturerToDistributor: TypedContractEvent<
+      ManufacturerToDistributorEvent.InputTuple,
+      ManufacturerToDistributorEvent.OutputTuple,
+      ManufacturerToDistributorEvent.OutputObject
+    >;
+
     "MetadataUpdate(uint256)": TypedContractEvent<
       MetadataUpdateEvent.InputTuple,
       MetadataUpdateEvent.OutputTuple,
@@ -713,17 +711,6 @@ export interface MyNFT extends BaseContract {
       MetadataUpdateEvent.OutputObject
     >;
 
-    "TrackingEvent(address,uint256)": TypedContractEvent<
-      TrackingEventEvent.InputTuple,
-      TrackingEventEvent.OutputTuple,
-      TrackingEventEvent.OutputObject
-    >;
-    TrackingEvent: TypedContractEvent<
-      TrackingEventEvent.InputTuple,
-      TrackingEventEvent.OutputTuple,
-      TrackingEventEvent.OutputObject
-    >;
-
     "Transfer(address,address,uint256)": TypedContractEvent<
       TransferEvent.InputTuple,
       TransferEvent.OutputTuple,
@@ -733,28 +720,6 @@ export interface MyNFT extends BaseContract {
       TransferEvent.InputTuple,
       TransferEvent.OutputTuple,
       TransferEvent.OutputObject
-    >;
-
-    "distributorToPharmacyEvent(address,address,uint256)": TypedContractEvent<
-      distributorToPharmacyEventEvent.InputTuple,
-      distributorToPharmacyEventEvent.OutputTuple,
-      distributorToPharmacyEventEvent.OutputObject
-    >;
-    distributorToPharmacyEvent: TypedContractEvent<
-      distributorToPharmacyEventEvent.InputTuple,
-      distributorToPharmacyEventEvent.OutputTuple,
-      distributorToPharmacyEventEvent.OutputObject
-    >;
-
-    "manufactorToDistributorEvent(address,address,uint256)": TypedContractEvent<
-      manufactorToDistributorEventEvent.InputTuple,
-      manufactorToDistributorEventEvent.OutputTuple,
-      manufactorToDistributorEventEvent.OutputObject
-    >;
-    manufactorToDistributorEvent: TypedContractEvent<
-      manufactorToDistributorEventEvent.InputTuple,
-      manufactorToDistributorEventEvent.OutputTuple,
-      manufactorToDistributorEventEvent.OutputObject
     >;
   };
 }

@@ -2,142 +2,115 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-
 import "./accessControl.sol";
-
 import "./libraries/structsLibrary.sol";
 
-contract MyNFT is ERC721URIStorage{
+contract MyNFT is ERC721URIStorage {
 
-    /*      ACCESS CONTROL SERVICE VARIBLE      */
-
+    /* ACCESS CONTROL SERVICE VARIABLE      */
     accessControlService public accessControlServiceObj;
 
 
-    /*              CONTRUCTOR          */
 
-    constructor(address initialOwner) ERC721("MyNFT", "NFT"){
-        accessControlServiceObj = accessControlService(initialOwner);
+    constructor(address _accessControlAddress) ERC721("MyNFT", "NFT") {
+        require(_accessControlAddress != address(0), "Invalid access control address");
+        accessControlServiceObj = accessControlService(_accessControlAddress);
     }
 
-    /*              EVENTS             */
 
-    event manufactorToDistributorEvent(address manufactorAddress , address DistributorAddress , uint recivedtimeSpan);
+    event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint indexed tokenId, uint receivedTimestamp);
+    event DistributorToPharmacy(address indexed distributorAddress, address indexed pharmacyAddress, uint indexed tokenId, uint receivedTimestamp);
 
 
-    event distributorToPharmacyEvent(address distributorAddress , address pharmacyAddress , uint recivedtimeSpan);
-
-    /*              VARIBLES        */
+    /*   VARIABLES        */
 
     uint256 private _tokenIds;
 
 
 
-    /*            BYTES ROLES              */
-
-    bytes32 public ManufactorByte = keccak256("Manufactor");
-
-    bytes32 public DistributorByte = keccak256("Distributor");
-
-    bytes32 public PharmacyByte = keccak256("Pharmacy");
-
-    /*              EVENTS              */
-
-    event TrackingEvent(address _Distributor , uint256);
-
-    /*              MAPPINGS            */
+    /*          MAPPINGS            */
 
     mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
-
-
-    /*              MINT NFT           */
-
 
     function mintNFT(string memory tokenURI)
         public
         returns (uint256)
     {
-
-        require(accessControlServiceObj.checkIsManufactor(msg.sender) , "You Don't Have Permisson To Call This Function");
-        // TOKEN uri sẽ là IPFS LÀ SỐ LÔ , .... 
+        require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer can mint");
 
         _tokenIds++;
-
         uint256 newItemId = _tokenIds;
         
         _mint(msg.sender, newItemId);
-
         _setTokenURI(newItemId, tokenURI);
 
         return newItemId;
     }
 
 
-    /*           MANUFACTOR TO DISTRIBUTOR                  */
+    /*          MANUFACTURER TO DISTRIBUTOR         */
 
-    function manufactorToDistributorFun(
-        uint256 tokenId ,
-        address distributorAddress) public
-    {
+    function manufacturerToDistributor(
+        uint256 tokenId,
+        address distributorAddress
+    ) public {
+        require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer");
+        require(accessControlServiceObj.checkIsDistributor(distributorAddress), "Invalid Target: Target is not a Distributor");
+        require(
+            accessControlServiceObj.isManufacturerDistributorApproved(msg.sender, distributorAddress),
+            "Authority Not Approved: This relationship has not been approved by both parties"
+        );
 
-        // Checking For If It's Valid Distributor Addreess
-
-        require(accessControlServiceObj.checkIsManufactor(msg.sender) , "Invalid Role");
-
-
-        require(accessControlServiceObj.checkManufactorAuthorityDistributor(distributorAddress)
-        , "Error Invalid Authority Wallet Address"); 
-
-
+        require(ownerOf(tokenId) == msg.sender, "ERC721: transfer from incorrect owner");
+        
         tokenIdTravelInfos[tokenId].push(AddressTracking(
-            ManufactorByte,
-            DistributorByte,
+            accessControlServiceObj.MANUFACTURER_ROLE(),
+            accessControlServiceObj.DISTRIBUTOR_ROLE(),
             msg.sender,
-            distributorAddress ,
+            distributorAddress,
             block.timestamp
         ));
 
-        // Emit Event
+        _transfer(msg.sender, distributorAddress, tokenId);
 
-        emit manufactorToDistributorEvent(msg.sender , distributorAddress , block.timestamp);
+        emit ManufacturerToDistributor(msg.sender, distributorAddress, tokenId, block.timestamp);
     }
 
 
-    /*                DISTRIBUTOR TO PHARMACY                  */
 
+    function distributorToPharmacy(
+        uint256 tokenId,
+        address pharmacyAddress
+    ) public {
+        require(accessControlServiceObj.checkIsDistributor(msg.sender), "Invalid Role: Only Distributor");
 
+        require(accessControlServiceObj.checkIsPharmacy(pharmacyAddress), "Invalid Target: Target is not a Pharmacy");
 
-    function DistributorToPharmacyFun(
-        uint256 tokenId ,
-        address PharmacyAddress) public
-    {
+        require(
+            accessControlServiceObj.isDistributorPharmacyApproved(msg.sender, pharmacyAddress),
+            "Authority Not Approved: This relationship has not been approved by both parties"
+        );
 
-        // Checking For If It's Valid Distributor Addreess
-
-        require(accessControlServiceObj.checkIsDistributor(msg.sender) , "Invalid Role");
-
-
-        require(accessControlServiceObj.checkDistributorAuthorityPharmacy(PharmacyAddress)
-        , "Error Invalid Authority Wallet Address"); 
-
+        require(ownerOf(tokenId) == msg.sender, "ERC721: transfer from incorrect owner");
 
         tokenIdTravelInfos[tokenId].push(AddressTracking(
-            DistributorByte,
-            PharmacyByte,
+            accessControlServiceObj.DISTRIBUTOR_ROLE(),
+            accessControlServiceObj.PHARMACY_ROLE(),
             msg.sender,
-            PharmacyAddress ,
+            pharmacyAddress,
             block.timestamp
         ));
 
-        emit distributorToPharmacyEvent(msg.sender, PharmacyAddress, block.timestamp);
+        _transfer(msg.sender, pharmacyAddress, tokenId);
+
+        emit DistributorToPharmacy(msg.sender, pharmacyAddress, tokenId, block.timestamp);
     }
 
-
-    /*
-
-        Cấu trúc 
-
-    */
-
-
+    function getTrackingHistory(uint256 tokenId) 
+        public 
+        view 
+        returns (AddressTracking[] memory) 
+    {
+        return tokenIdTravelInfos[tokenId];
+    }
 }

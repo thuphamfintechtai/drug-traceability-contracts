@@ -25,61 +25,76 @@ import type {
 export interface AccessControlServiceInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "DistributorAuthorityPharmacyFun"
-      | "DistributorUnauthorityPharmacyFun"
-      | "ManufactureAuthorityDistributorFun"
-      | "ManufactureUnauthorityDistributorFun"
+      | "DISTRIBUTOR_ROLE"
+      | "DIST_PHAR_RELATION"
+      | "MANUFACTURER_ROLE"
+      | "MANU_DIST_RELATION"
+      | "PHARMACY_ROLE"
       | "addDistributor"
-      | "addManufacture"
+      | "addManufacturer"
       | "addPharmacy"
-      | "checkDistributorAuthorityPharmacy"
       | "checkIsDistributor"
-      | "checkIsManufactor"
+      | "checkIsManufacturer"
       | "checkIsPharmacy"
-      | "checkManufactorAuthorityDistributor"
-      | "distributorAuthorityPharmacy"
+      | "distributorApproveManufacturer"
+      | "distributorApprovePharmacy"
+      | "distributorPharmacyStatus"
+      | "distributorRequestManufacturer"
+      | "distributorRequestPharmacy"
       | "isAdmin"
       | "isDistributor"
-      | "isManufacture"
+      | "isDistributorPharmacyApproved"
+      | "isManufacturer"
+      | "isManufacturerDistributorApproved"
       | "isPharmacy"
-      | "manufactureAuthorityDistributor"
+      | "manufacturerApproveDistributor"
+      | "manufacturerDistributorStatus"
+      | "manufacturerRequestDistributor"
+      | "pharmacyApproveDistributor"
+      | "pharmacyRequestDistributor"
       | "removeDistributor"
-      | "removeManufacture"
+      | "removeDistributorPharmacyLink"
+      | "removeManufacturer"
+      | "removeManufacturerDistributorLink"
       | "removePharmacy"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "PermissionRemoveEvent"
-      | "distributorAuthorityEvent"
-      | "distributorUnauthorityEvent"
-      | "grantPermissonEvent"
-      | "manufactureAuthorityEvent"
-      | "manufactureUnauthorityEvent"
+      | "PermissionGranted"
+      | "PermissionRevoked"
+      | "RelationshipApproved"
+      | "RelationshipRejected"
+      | "RelationshipRemoved"
+      | "RelationshipRequested"
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "DistributorAuthorityPharmacyFun",
-    values: [AddressLike]
+    functionFragment: "DISTRIBUTOR_ROLE",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "DistributorUnauthorityPharmacyFun",
-    values: [AddressLike]
+    functionFragment: "DIST_PHAR_RELATION",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ManufactureAuthorityDistributorFun",
-    values: [AddressLike]
+    functionFragment: "MANUFACTURER_ROLE",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ManufactureUnauthorityDistributorFun",
-    values: [AddressLike]
+    functionFragment: "MANU_DIST_RELATION",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PHARMACY_ROLE",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "addDistributor",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "addManufacture",
+    functionFragment: "addManufacturer",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
@@ -87,15 +102,11 @@ export interface AccessControlServiceInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkDistributorAuthorityPharmacy",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "checkIsDistributor",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkIsManufactor",
+    functionFragment: "checkIsManufacturer",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
@@ -103,12 +114,24 @@ export interface AccessControlServiceInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkManufactorAuthorityDistributor",
+    functionFragment: "distributorApproveManufacturer",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "distributorAuthorityPharmacy",
+    functionFragment: "distributorApprovePharmacy",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "distributorPharmacyStatus",
     values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "distributorRequestManufacturer",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "distributorRequestPharmacy",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "isAdmin",
@@ -119,23 +142,55 @@ export interface AccessControlServiceInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "isManufacture",
+    functionFragment: "isDistributorPharmacyApproved",
+    values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isManufacturer",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isManufacturerDistributorApproved",
+    values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "isPharmacy",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "manufactureAuthorityDistributor",
+    functionFragment: "manufacturerApproveDistributor",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "manufacturerDistributorStatus",
     values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "manufacturerRequestDistributor",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "pharmacyApproveDistributor",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "pharmacyRequestDistributor",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "removeDistributor",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeManufacture",
+    functionFragment: "removeDistributorPharmacyLink",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeManufacturer",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeManufacturerDistributorLink",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
@@ -144,19 +199,23 @@ export interface AccessControlServiceInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "DistributorAuthorityPharmacyFun",
+    functionFragment: "DISTRIBUTOR_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "DistributorUnauthorityPharmacyFun",
+    functionFragment: "DIST_PHAR_RELATION",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ManufactureAuthorityDistributorFun",
+    functionFragment: "MANUFACTURER_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ManufactureUnauthorityDistributorFun",
+    functionFragment: "MANU_DIST_RELATION",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PHARMACY_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -164,7 +223,7 @@ export interface AccessControlServiceInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addManufacture",
+    functionFragment: "addManufacturer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -172,15 +231,11 @@ export interface AccessControlServiceInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "checkDistributorAuthorityPharmacy",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "checkIsDistributor",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "checkIsManufactor",
+    functionFragment: "checkIsManufacturer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -188,11 +243,23 @@ export interface AccessControlServiceInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "checkManufactorAuthorityDistributor",
+    functionFragment: "distributorApproveManufacturer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "distributorAuthorityPharmacy",
+    functionFragment: "distributorApprovePharmacy",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "distributorPharmacyStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "distributorRequestManufacturer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "distributorRequestPharmacy",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "isAdmin", data: BytesLike): Result;
@@ -201,12 +268,36 @@ export interface AccessControlServiceInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isManufacture",
+    functionFragment: "isDistributorPharmacyApproved",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isManufacturer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isManufacturerDistributorApproved",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "isPharmacy", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "manufactureAuthorityDistributor",
+    functionFragment: "manufacturerApproveDistributor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "manufacturerDistributorStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "manufacturerRequestDistributor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "pharmacyApproveDistributor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "pharmacyRequestDistributor",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -214,7 +305,15 @@ export interface AccessControlServiceInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removeManufacture",
+    functionFragment: "removeDistributorPharmacyLink",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeManufacturer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeManufacturerDistributorLink",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -223,12 +322,17 @@ export interface AccessControlServiceInterface extends Interface {
   ): Result;
 }
 
-export namespace PermissionRemoveEventEvent {
-  export type InputTuple = [granter: AddressLike, reciver: AddressLike];
-  export type OutputTuple = [granter: string, reciver: string];
+export namespace PermissionGrantedEvent {
+  export type InputTuple = [
+    granter: AddressLike,
+    receiver: AddressLike,
+    role: BytesLike
+  ];
+  export type OutputTuple = [granter: string, receiver: string, role: string];
   export interface OutputObject {
     granter: string;
-    reciver: string;
+    receiver: string;
+    role: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -236,50 +340,17 @@ export namespace PermissionRemoveEventEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace distributorAuthorityEventEvent {
+export namespace PermissionRevokedEvent {
   export type InputTuple = [
-    DistributorAddress: AddressLike,
-    PharmacyAddress: AddressLike
+    granter: AddressLike,
+    receiver: AddressLike,
+    role: BytesLike
   ];
-  export type OutputTuple = [
-    DistributorAddress: string,
-    PharmacyAddress: string
-  ];
-  export interface OutputObject {
-    DistributorAddress: string;
-    PharmacyAddress: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace distributorUnauthorityEventEvent {
-  export type InputTuple = [
-    DistributorAddress: AddressLike,
-    PharmacyAddress: AddressLike
-  ];
-  export type OutputTuple = [
-    DistributorAddress: string,
-    PharmacyAddress: string
-  ];
-  export interface OutputObject {
-    DistributorAddress: string;
-    PharmacyAddress: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace grantPermissonEventEvent {
-  export type InputTuple = [granter: AddressLike, reciver: AddressLike];
-  export type OutputTuple = [granter: string, reciver: string];
+  export type OutputTuple = [granter: string, receiver: string, role: string];
   export interface OutputObject {
     granter: string;
-    reciver: string;
+    receiver: string;
+    role: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -287,18 +358,21 @@ export namespace grantPermissonEventEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace manufactureAuthorityEventEvent {
+export namespace RelationshipApprovedEvent {
   export type InputTuple = [
-    ManufactorAddress: AddressLike,
-    DistributorAddress: AddressLike
+    approver: AddressLike,
+    requester: AddressLike,
+    relationshipType: BytesLike
   ];
   export type OutputTuple = [
-    ManufactorAddress: string,
-    DistributorAddress: string
+    approver: string,
+    requester: string,
+    relationshipType: string
   ];
   export interface OutputObject {
-    ManufactorAddress: string;
-    DistributorAddress: string;
+    approver: string;
+    requester: string;
+    relationshipType: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -306,18 +380,65 @@ export namespace manufactureAuthorityEventEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace manufactureUnauthorityEventEvent {
+export namespace RelationshipRejectedEvent {
   export type InputTuple = [
-    ManufactorAddress: AddressLike,
-    DistributorAddress: AddressLike
+    party1: AddressLike,
+    party2: AddressLike,
+    relationshipType: BytesLike
   ];
   export type OutputTuple = [
-    ManufactorAddress: string,
-    DistributorAddress: string
+    party1: string,
+    party2: string,
+    relationshipType: string
   ];
   export interface OutputObject {
-    ManufactorAddress: string;
-    DistributorAddress: string;
+    party1: string;
+    party2: string;
+    relationshipType: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace RelationshipRemovedEvent {
+  export type InputTuple = [
+    remover: AddressLike,
+    otherParty: AddressLike,
+    relationshipType: BytesLike
+  ];
+  export type OutputTuple = [
+    remover: string,
+    otherParty: string,
+    relationshipType: string
+  ];
+  export interface OutputObject {
+    remover: string;
+    otherParty: string;
+    relationshipType: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace RelationshipRequestedEvent {
+  export type InputTuple = [
+    requester: AddressLike,
+    approver: AddressLike,
+    relationshipType: BytesLike
+  ];
+  export type OutputTuple = [
+    requester: string,
+    approver: string,
+    relationshipType: string
+  ];
+  export interface OutputObject {
+    requester: string;
+    approver: string;
+    relationshipType: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -368,112 +489,158 @@ export interface AccessControlService extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  DistributorAuthorityPharmacyFun: TypedContractMethod<
-    [_PharmacyAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  DISTRIBUTOR_ROLE: TypedContractMethod<[], [string], "view">;
 
-  DistributorUnauthorityPharmacyFun: TypedContractMethod<
-    [_PharmacyAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  DIST_PHAR_RELATION: TypedContractMethod<[], [string], "view">;
 
-  ManufactureAuthorityDistributorFun: TypedContractMethod<
-    [_DistributorAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  MANUFACTURER_ROLE: TypedContractMethod<[], [string], "view">;
 
-  ManufactureUnauthorityDistributorFun: TypedContractMethod<
-    [_DistributorAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  MANU_DIST_RELATION: TypedContractMethod<[], [string], "view">;
+
+  PHARMACY_ROLE: TypedContractMethod<[], [string], "view">;
 
   addDistributor: TypedContractMethod<
-    [_Distributor: AddressLike],
+    [_distributor: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  addManufacture: TypedContractMethod<
-    [_Manufacture: AddressLike],
+  addManufacturer: TypedContractMethod<
+    [_manufacturer: AddressLike],
     [void],
     "nonpayable"
   >;
 
   addPharmacy: TypedContractMethod<
-    [_Pharmacy: AddressLike],
+    [_pharmacy: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  checkDistributorAuthorityPharmacy: TypedContractMethod<
-    [_PharmacyAddress: AddressLike],
-    [boolean],
-    "view"
-  >;
-
   checkIsDistributor: TypedContractMethod<
-    [_DistributorAddress: AddressLike],
+    [_distributorAddress: AddressLike],
     [boolean],
     "view"
   >;
 
-  checkIsManufactor: TypedContractMethod<
-    [_ManufactorAddress: AddressLike],
+  checkIsManufacturer: TypedContractMethod<
+    [_manufacturerAddress: AddressLike],
     [boolean],
     "view"
   >;
 
   checkIsPharmacy: TypedContractMethod<
-    [_PharmacyAddress: AddressLike],
+    [_pharmacyAddress: AddressLike],
     [boolean],
     "view"
   >;
 
-  checkManufactorAuthorityDistributor: TypedContractMethod<
-    [_DistributorAddress: AddressLike],
-    [boolean],
-    "view"
+  distributorApproveManufacturer: TypedContractMethod<
+    [_manufacturer: AddressLike],
+    [void],
+    "nonpayable"
   >;
 
-  distributorAuthorityPharmacy: TypedContractMethod<
+  distributorApprovePharmacy: TypedContractMethod<
+    [_pharmacy: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  distributorPharmacyStatus: TypedContractMethod<
     [arg0: AddressLike, arg1: AddressLike],
-    [boolean],
+    [bigint],
     "view"
+  >;
+
+  distributorRequestManufacturer: TypedContractMethod<
+    [_manufacturer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  distributorRequestPharmacy: TypedContractMethod<
+    [_pharmacy: AddressLike],
+    [void],
+    "nonpayable"
   >;
 
   isAdmin: TypedContractMethod<[_adminAddress: AddressLike], [boolean], "view">;
 
   isDistributor: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
 
-  isManufacture: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-
-  isPharmacy: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-
-  manufactureAuthorityDistributor: TypedContractMethod<
-    [arg0: AddressLike, arg1: AddressLike],
+  isDistributorPharmacyApproved: TypedContractMethod<
+    [_distributor: AddressLike, _pharmacy: AddressLike],
     [boolean],
     "view"
   >;
 
-  removeDistributor: TypedContractMethod<
-    [_Distributor: AddressLike],
+  isManufacturer: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+
+  isManufacturerDistributorApproved: TypedContractMethod<
+    [_manufacturer: AddressLike, _distributor: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  isPharmacy: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+
+  manufacturerApproveDistributor: TypedContractMethod<
+    [_distributor: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  removeManufacture: TypedContractMethod<
-    [_Manufacture: AddressLike],
+  manufacturerDistributorStatus: TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike],
+    [bigint],
+    "view"
+  >;
+
+  manufacturerRequestDistributor: TypedContractMethod<
+    [_distributor: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  pharmacyApproveDistributor: TypedContractMethod<
+    [_distributor: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  pharmacyRequestDistributor: TypedContractMethod<
+    [_distributor: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  removeDistributor: TypedContractMethod<
+    [_distributor: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  removeDistributorPharmacyLink: TypedContractMethod<
+    [_otherParty: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  removeManufacturer: TypedContractMethod<
+    [_manufacturer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  removeManufacturerDistributorLink: TypedContractMethod<
+    [_otherParty: AddressLike],
     [void],
     "nonpayable"
   >;
 
   removePharmacy: TypedContractMethod<
-    [_Pharmacy: AddressLike],
+    [_pharmacy: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -483,56 +650,61 @@ export interface AccessControlService extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "DistributorAuthorityPharmacyFun"
-  ): TypedContractMethod<[_PharmacyAddress: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "DISTRIBUTOR_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "DistributorUnauthorityPharmacyFun"
-  ): TypedContractMethod<[_PharmacyAddress: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "DIST_PHAR_RELATION"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "ManufactureAuthorityDistributorFun"
-  ): TypedContractMethod<
-    [_DistributorAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "MANUFACTURER_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "ManufactureUnauthorityDistributorFun"
-  ): TypedContractMethod<
-    [_DistributorAddress: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "MANU_DIST_RELATION"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "PHARMACY_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "addDistributor"
-  ): TypedContractMethod<[_Distributor: AddressLike], [void], "nonpayable">;
+  ): TypedContractMethod<[_distributor: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "addManufacture"
-  ): TypedContractMethod<[_Manufacture: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "addManufacturer"
+  ): TypedContractMethod<[_manufacturer: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "addPharmacy"
-  ): TypedContractMethod<[_Pharmacy: AddressLike], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "checkDistributorAuthorityPharmacy"
-  ): TypedContractMethod<[_PharmacyAddress: AddressLike], [boolean], "view">;
+  ): TypedContractMethod<[_pharmacy: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "checkIsDistributor"
-  ): TypedContractMethod<[_DistributorAddress: AddressLike], [boolean], "view">;
+  ): TypedContractMethod<[_distributorAddress: AddressLike], [boolean], "view">;
   getFunction(
-    nameOrSignature: "checkIsManufactor"
-  ): TypedContractMethod<[_ManufactorAddress: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "checkIsPharmacy"
-  ): TypedContractMethod<[_PharmacyAddress: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "checkManufactorAuthorityDistributor"
-  ): TypedContractMethod<[_DistributorAddress: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "distributorAuthorityPharmacy"
+    nameOrSignature: "checkIsManufacturer"
   ): TypedContractMethod<
-    [arg0: AddressLike, arg1: AddressLike],
+    [_manufacturerAddress: AddressLike],
     [boolean],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "checkIsPharmacy"
+  ): TypedContractMethod<[_pharmacyAddress: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "distributorApproveManufacturer"
+  ): TypedContractMethod<[_manufacturer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "distributorApprovePharmacy"
+  ): TypedContractMethod<[_pharmacy: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "distributorPharmacyStatus"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "distributorRequestManufacturer"
+  ): TypedContractMethod<[_manufacturer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "distributorRequestPharmacy"
+  ): TypedContractMethod<[_pharmacy: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "isAdmin"
   ): TypedContractMethod<[_adminAddress: AddressLike], [boolean], "view">;
@@ -540,136 +712,168 @@ export interface AccessControlService extends BaseContract {
     nameOrSignature: "isDistributor"
   ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
   getFunction(
-    nameOrSignature: "isManufacture"
-  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "isPharmacy"
-  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "manufactureAuthorityDistributor"
+    nameOrSignature: "isDistributorPharmacyApproved"
   ): TypedContractMethod<
-    [arg0: AddressLike, arg1: AddressLike],
+    [_distributor: AddressLike, _pharmacy: AddressLike],
     [boolean],
     "view"
   >;
   getFunction(
-    nameOrSignature: "removeDistributor"
-  ): TypedContractMethod<[_Distributor: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "isManufacturer"
+  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
   getFunction(
-    nameOrSignature: "removeManufacture"
-  ): TypedContractMethod<[_Manufacture: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "isManufacturerDistributorApproved"
+  ): TypedContractMethod<
+    [_manufacturer: AddressLike, _distributor: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "isPharmacy"
+  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "manufacturerApproveDistributor"
+  ): TypedContractMethod<[_distributor: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "manufacturerDistributorStatus"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "manufacturerRequestDistributor"
+  ): TypedContractMethod<[_distributor: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "pharmacyApproveDistributor"
+  ): TypedContractMethod<[_distributor: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "pharmacyRequestDistributor"
+  ): TypedContractMethod<[_distributor: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "removeDistributor"
+  ): TypedContractMethod<[_distributor: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "removeDistributorPharmacyLink"
+  ): TypedContractMethod<[_otherParty: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "removeManufacturer"
+  ): TypedContractMethod<[_manufacturer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "removeManufacturerDistributorLink"
+  ): TypedContractMethod<[_otherParty: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "removePharmacy"
-  ): TypedContractMethod<[_Pharmacy: AddressLike], [void], "nonpayable">;
+  ): TypedContractMethod<[_pharmacy: AddressLike], [void], "nonpayable">;
 
   getEvent(
-    key: "PermissionRemoveEvent"
+    key: "PermissionGranted"
   ): TypedContractEvent<
-    PermissionRemoveEventEvent.InputTuple,
-    PermissionRemoveEventEvent.OutputTuple,
-    PermissionRemoveEventEvent.OutputObject
+    PermissionGrantedEvent.InputTuple,
+    PermissionGrantedEvent.OutputTuple,
+    PermissionGrantedEvent.OutputObject
   >;
   getEvent(
-    key: "distributorAuthorityEvent"
+    key: "PermissionRevoked"
   ): TypedContractEvent<
-    distributorAuthorityEventEvent.InputTuple,
-    distributorAuthorityEventEvent.OutputTuple,
-    distributorAuthorityEventEvent.OutputObject
+    PermissionRevokedEvent.InputTuple,
+    PermissionRevokedEvent.OutputTuple,
+    PermissionRevokedEvent.OutputObject
   >;
   getEvent(
-    key: "distributorUnauthorityEvent"
+    key: "RelationshipApproved"
   ): TypedContractEvent<
-    distributorUnauthorityEventEvent.InputTuple,
-    distributorUnauthorityEventEvent.OutputTuple,
-    distributorUnauthorityEventEvent.OutputObject
+    RelationshipApprovedEvent.InputTuple,
+    RelationshipApprovedEvent.OutputTuple,
+    RelationshipApprovedEvent.OutputObject
   >;
   getEvent(
-    key: "grantPermissonEvent"
+    key: "RelationshipRejected"
   ): TypedContractEvent<
-    grantPermissonEventEvent.InputTuple,
-    grantPermissonEventEvent.OutputTuple,
-    grantPermissonEventEvent.OutputObject
+    RelationshipRejectedEvent.InputTuple,
+    RelationshipRejectedEvent.OutputTuple,
+    RelationshipRejectedEvent.OutputObject
   >;
   getEvent(
-    key: "manufactureAuthorityEvent"
+    key: "RelationshipRemoved"
   ): TypedContractEvent<
-    manufactureAuthorityEventEvent.InputTuple,
-    manufactureAuthorityEventEvent.OutputTuple,
-    manufactureAuthorityEventEvent.OutputObject
+    RelationshipRemovedEvent.InputTuple,
+    RelationshipRemovedEvent.OutputTuple,
+    RelationshipRemovedEvent.OutputObject
   >;
   getEvent(
-    key: "manufactureUnauthorityEvent"
+    key: "RelationshipRequested"
   ): TypedContractEvent<
-    manufactureUnauthorityEventEvent.InputTuple,
-    manufactureUnauthorityEventEvent.OutputTuple,
-    manufactureUnauthorityEventEvent.OutputObject
+    RelationshipRequestedEvent.InputTuple,
+    RelationshipRequestedEvent.OutputTuple,
+    RelationshipRequestedEvent.OutputObject
   >;
 
   filters: {
-    "PermissionRemoveEvent(address,address)": TypedContractEvent<
-      PermissionRemoveEventEvent.InputTuple,
-      PermissionRemoveEventEvent.OutputTuple,
-      PermissionRemoveEventEvent.OutputObject
+    "PermissionGranted(address,address,bytes32)": TypedContractEvent<
+      PermissionGrantedEvent.InputTuple,
+      PermissionGrantedEvent.OutputTuple,
+      PermissionGrantedEvent.OutputObject
     >;
-    PermissionRemoveEvent: TypedContractEvent<
-      PermissionRemoveEventEvent.InputTuple,
-      PermissionRemoveEventEvent.OutputTuple,
-      PermissionRemoveEventEvent.OutputObject
-    >;
-
-    "distributorAuthorityEvent(address,address)": TypedContractEvent<
-      distributorAuthorityEventEvent.InputTuple,
-      distributorAuthorityEventEvent.OutputTuple,
-      distributorAuthorityEventEvent.OutputObject
-    >;
-    distributorAuthorityEvent: TypedContractEvent<
-      distributorAuthorityEventEvent.InputTuple,
-      distributorAuthorityEventEvent.OutputTuple,
-      distributorAuthorityEventEvent.OutputObject
+    PermissionGranted: TypedContractEvent<
+      PermissionGrantedEvent.InputTuple,
+      PermissionGrantedEvent.OutputTuple,
+      PermissionGrantedEvent.OutputObject
     >;
 
-    "distributorUnauthorityEvent(address,address)": TypedContractEvent<
-      distributorUnauthorityEventEvent.InputTuple,
-      distributorUnauthorityEventEvent.OutputTuple,
-      distributorUnauthorityEventEvent.OutputObject
+    "PermissionRevoked(address,address,bytes32)": TypedContractEvent<
+      PermissionRevokedEvent.InputTuple,
+      PermissionRevokedEvent.OutputTuple,
+      PermissionRevokedEvent.OutputObject
     >;
-    distributorUnauthorityEvent: TypedContractEvent<
-      distributorUnauthorityEventEvent.InputTuple,
-      distributorUnauthorityEventEvent.OutputTuple,
-      distributorUnauthorityEventEvent.OutputObject
-    >;
-
-    "grantPermissonEvent(address,address)": TypedContractEvent<
-      grantPermissonEventEvent.InputTuple,
-      grantPermissonEventEvent.OutputTuple,
-      grantPermissonEventEvent.OutputObject
-    >;
-    grantPermissonEvent: TypedContractEvent<
-      grantPermissonEventEvent.InputTuple,
-      grantPermissonEventEvent.OutputTuple,
-      grantPermissonEventEvent.OutputObject
+    PermissionRevoked: TypedContractEvent<
+      PermissionRevokedEvent.InputTuple,
+      PermissionRevokedEvent.OutputTuple,
+      PermissionRevokedEvent.OutputObject
     >;
 
-    "manufactureAuthorityEvent(address,address)": TypedContractEvent<
-      manufactureAuthorityEventEvent.InputTuple,
-      manufactureAuthorityEventEvent.OutputTuple,
-      manufactureAuthorityEventEvent.OutputObject
+    "RelationshipApproved(address,address,bytes32)": TypedContractEvent<
+      RelationshipApprovedEvent.InputTuple,
+      RelationshipApprovedEvent.OutputTuple,
+      RelationshipApprovedEvent.OutputObject
     >;
-    manufactureAuthorityEvent: TypedContractEvent<
-      manufactureAuthorityEventEvent.InputTuple,
-      manufactureAuthorityEventEvent.OutputTuple,
-      manufactureAuthorityEventEvent.OutputObject
+    RelationshipApproved: TypedContractEvent<
+      RelationshipApprovedEvent.InputTuple,
+      RelationshipApprovedEvent.OutputTuple,
+      RelationshipApprovedEvent.OutputObject
     >;
 
-    "manufactureUnauthorityEvent(address,address)": TypedContractEvent<
-      manufactureUnauthorityEventEvent.InputTuple,
-      manufactureUnauthorityEventEvent.OutputTuple,
-      manufactureUnauthorityEventEvent.OutputObject
+    "RelationshipRejected(address,address,bytes32)": TypedContractEvent<
+      RelationshipRejectedEvent.InputTuple,
+      RelationshipRejectedEvent.OutputTuple,
+      RelationshipRejectedEvent.OutputObject
     >;
-    manufactureUnauthorityEvent: TypedContractEvent<
-      manufactureUnauthorityEventEvent.InputTuple,
-      manufactureUnauthorityEventEvent.OutputTuple,
-      manufactureUnauthorityEventEvent.OutputObject
+    RelationshipRejected: TypedContractEvent<
+      RelationshipRejectedEvent.InputTuple,
+      RelationshipRejectedEvent.OutputTuple,
+      RelationshipRejectedEvent.OutputObject
+    >;
+
+    "RelationshipRemoved(address,address,bytes32)": TypedContractEvent<
+      RelationshipRemovedEvent.InputTuple,
+      RelationshipRemovedEvent.OutputTuple,
+      RelationshipRemovedEvent.OutputObject
+    >;
+    RelationshipRemoved: TypedContractEvent<
+      RelationshipRemovedEvent.InputTuple,
+      RelationshipRemovedEvent.OutputTuple,
+      RelationshipRemovedEvent.OutputObject
+    >;
+
+    "RelationshipRequested(address,address,bytes32)": TypedContractEvent<
+      RelationshipRequestedEvent.InputTuple,
+      RelationshipRequestedEvent.OutputTuple,
+      RelationshipRequestedEvent.OutputObject
+    >;
+    RelationshipRequested: TypedContractEvent<
+      RelationshipRequestedEvent.InputTuple,
+      RelationshipRequestedEvent.OutputTuple,
+      RelationshipRequestedEvent.OutputObject
     >;
   };
 }
