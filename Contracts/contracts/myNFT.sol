@@ -18,8 +18,8 @@ contract MyNFT is ERC721URIStorage {
     }
 
 
-    event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint indexed tokenId, uint receivedTimestamp);
-    event DistributorToPharmacy(address indexed distributorAddress, address indexed pharmacyAddress, uint indexed tokenId, uint receivedTimestamp);
+    event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint []indexed tokenId, uint receivedTimestamp);
+    event DistributorToPharmacy(address indexed distributorAddress, address indexed pharmacyAddress, uint [] indexed tokenId, uint receivedTimestamp);
 
 
     /*   VARIABLES        */
@@ -32,26 +32,36 @@ contract MyNFT is ERC721URIStorage {
 
     mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
 
-    function mintNFT(string memory tokenURI)
+    // Return A List Of IDs
+
+    function mintNFT(string [] memory tokenURIs)
         public
-        returns (uint256)
+        returns (uint256 [] memory)
     {
+        uint256 [] memory tokenIds = new uint256[](tokenURIs.length);
+
         require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer can mint");
 
-        _tokenIds++;
-        uint256 newItemId = _tokenIds;
-        
-        _mint(msg.sender, newItemId);
-        _setTokenURI(newItemId, tokenURI);
+        for(uint256 tokenURIIndex = 0 ; tokenURIIndex < tokenURIs.length;tokenURIIndex++)
+        {
+            _tokenIds++;
+            uint256 newItemId = _tokenIds;
+            _mint(msg.sender, newItemId);
+            _setTokenURI(newItemId, tokenURIs[tokenURIIndex]);
 
-        return newItemId;
+            // Push into a array
+
+            tokenIds[tokenURIIndex] = newItemId;
+        }
+
+        return tokenIds;
     }
 
 
-    /*          MANUFACTURER TO DISTRIBUTOR         */
+    /*          TRANSFER TOKENID MANUFACTURER TO DISTRIBUTOR         */
 
     function manufacturerToDistributor(
-        uint256 tokenId,
+        uint256 [] memory tokenId,
         address distributorAddress
     ) public {
         require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer");
@@ -61,25 +71,29 @@ contract MyNFT is ERC721URIStorage {
             "Authority Not Approved: This relationship has not been approved by both parties"
         );
 
-        require(ownerOf(tokenId) == msg.sender, "ERC721: transfer from incorrect owner");
-        
-        tokenIdTravelInfos[tokenId].push(AddressTracking(
-            accessControlServiceObj.MANUFACTURER_ROLE(),
-            accessControlServiceObj.DISTRIBUTOR_ROLE(),
-            msg.sender,
-            distributorAddress,
-            block.timestamp
-        ));
+        for(uint256 i = 0;i<tokenId.length;i++)
+        {
+            require(ownerOf(tokenId[i]) == msg.sender, "ERC721: transfer from incorrect owner");
+        }
 
-        _transfer(msg.sender, distributorAddress, tokenId);
-
+        for(uint256 tokenIdValue = 0;tokenIdValue < tokenId.length;tokenIdValue++)
+        {
+            tokenIdTravelInfos[tokenId[tokenIdValue]].push(AddressTracking(
+                accessControlServiceObj.MANUFACTURER_ROLE(),
+                accessControlServiceObj.DISTRIBUTOR_ROLE(),
+                msg.sender,
+                distributorAddress,
+                block.timestamp
+            ));
+        }
+    
         emit ManufacturerToDistributor(msg.sender, distributorAddress, tokenId, block.timestamp);
     }
 
-
+    /*            TRANSFER TOKENID DISTRIBUTOR TO PHARMACY                  */
 
     function distributorToPharmacy(
-        uint256 tokenId,
+        uint256 [] memory tokenId,
         address pharmacyAddress
     ) public {
         require(accessControlServiceObj.checkIsDistributor(msg.sender), "Invalid Role: Only Distributor");
@@ -91,17 +105,16 @@ contract MyNFT is ERC721URIStorage {
             "Authority Not Approved: This relationship has not been approved by both parties"
         );
 
-        require(ownerOf(tokenId) == msg.sender, "ERC721: transfer from incorrect owner");
-
-        tokenIdTravelInfos[tokenId].push(AddressTracking(
-            accessControlServiceObj.DISTRIBUTOR_ROLE(),
-            accessControlServiceObj.PHARMACY_ROLE(),
-            msg.sender,
-            pharmacyAddress,
-            block.timestamp
-        ));
-
-        _transfer(msg.sender, pharmacyAddress, tokenId);
+        for(uint tokenIndexValue =0;tokenIndexValue < tokenId.length;tokenIndexValue++)
+        {
+            tokenIdTravelInfos[tokenId[tokenIndexValue]].push(AddressTracking(
+                accessControlServiceObj.DISTRIBUTOR_ROLE(),
+                accessControlServiceObj.PHARMACY_ROLE(),
+                msg.sender,
+                pharmacyAddress,
+                block.timestamp
+            ));
+        }
 
         emit DistributorToPharmacy(msg.sender, pharmacyAddress, tokenId, block.timestamp);
     }

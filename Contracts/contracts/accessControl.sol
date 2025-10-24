@@ -109,7 +109,7 @@ contract accessControlService {
         emit PermissionRevoked(msg.sender, _distributor, DISTRIBUTOR_ROLE);
     }
 
-    /* A        UTHORITIES FUNCTIONS            */
+    /*         UTHORITIES FUNCTIONS            */
 
 
 

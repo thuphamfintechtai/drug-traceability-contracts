@@ -94,7 +94,7 @@ export interface MyNFTInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "distributorToPharmacy",
-    values: [BigNumberish, AddressLike]
+    values: [BigNumberish[], AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -110,9 +110,9 @@ export interface MyNFTInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "manufacturerToDistributor",
-    values: [BigNumberish, AddressLike]
+    values: [BigNumberish[], AddressLike]
   ): string;
-  encodeFunctionData(functionFragment: "mintNFT", values: [string]): string;
+  encodeFunctionData(functionFragment: "mintNFT", values: [string[]]): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
@@ -265,19 +265,19 @@ export namespace DistributorToPharmacyEvent {
   export type InputTuple = [
     distributorAddress: AddressLike,
     pharmacyAddress: AddressLike,
-    tokenId: BigNumberish,
+    tokenId: BigNumberish[],
     receivedTimestamp: BigNumberish
   ];
   export type OutputTuple = [
     distributorAddress: string,
     pharmacyAddress: string,
-    tokenId: bigint,
+    tokenId: bigint[],
     receivedTimestamp: bigint
   ];
   export interface OutputObject {
     distributorAddress: string;
     pharmacyAddress: string;
-    tokenId: bigint;
+    tokenId: bigint[];
     receivedTimestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -290,19 +290,19 @@ export namespace ManufacturerToDistributorEvent {
   export type InputTuple = [
     manufacturerAddress: AddressLike,
     distributorAddress: AddressLike,
-    tokenId: BigNumberish,
+    tokenId: BigNumberish[],
     receivedTimestamp: BigNumberish
   ];
   export type OutputTuple = [
     manufacturerAddress: string,
     distributorAddress: string,
-    tokenId: bigint,
+    tokenId: bigint[],
     receivedTimestamp: bigint
   ];
   export interface OutputObject {
     manufacturerAddress: string;
     distributorAddress: string;
-    tokenId: bigint;
+    tokenId: bigint[];
     receivedTimestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -395,7 +395,7 @@ export interface MyNFT extends BaseContract {
   balanceOf: TypedContractMethod<[owner: AddressLike], [bigint], "view">;
 
   distributorToPharmacy: TypedContractMethod<
-    [tokenId: BigNumberish, pharmacyAddress: AddressLike],
+    [tokenId: BigNumberish[], pharmacyAddress: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -415,12 +415,12 @@ export interface MyNFT extends BaseContract {
   >;
 
   manufacturerToDistributor: TypedContractMethod<
-    [tokenId: BigNumberish, distributorAddress: AddressLike],
+    [tokenId: BigNumberish[], distributorAddress: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  mintNFT: TypedContractMethod<[tokenURI: string], [bigint], "nonpayable">;
+  mintNFT: TypedContractMethod<[tokenURIs: string[]], [bigint[]], "nonpayable">;
 
   name: TypedContractMethod<[], [string], "view">;
 
@@ -499,7 +499,7 @@ export interface MyNFT extends BaseContract {
   getFunction(
     nameOrSignature: "distributorToPharmacy"
   ): TypedContractMethod<
-    [tokenId: BigNumberish, pharmacyAddress: AddressLike],
+    [tokenId: BigNumberish[], pharmacyAddress: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -523,13 +523,13 @@ export interface MyNFT extends BaseContract {
   getFunction(
     nameOrSignature: "manufacturerToDistributor"
   ): TypedContractMethod<
-    [tokenId: BigNumberish, distributorAddress: AddressLike],
+    [tokenId: BigNumberish[], distributorAddress: AddressLike],
     [void],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "mintNFT"
-  ): TypedContractMethod<[tokenURI: string], [bigint], "nonpayable">;
+  ): TypedContractMethod<[tokenURIs: string[]], [bigint[]], "nonpayable">;
   getFunction(
     nameOrSignature: "name"
   ): TypedContractMethod<[], [string], "view">;
@@ -678,7 +678,7 @@ export interface MyNFT extends BaseContract {
       BatchMetadataUpdateEvent.OutputObject
     >;
 
-    "DistributorToPharmacy(address,address,uint256,uint256)": TypedContractEvent<
+    "DistributorToPharmacy(address,address,uint256[],uint256)": TypedContractEvent<
       DistributorToPharmacyEvent.InputTuple,
       DistributorToPharmacyEvent.OutputTuple,
       DistributorToPharmacyEvent.OutputObject
@@ -689,7 +689,7 @@ export interface MyNFT extends BaseContract {
       DistributorToPharmacyEvent.OutputObject
     >;
 
-    "ManufacturerToDistributor(address,address,uint256,uint256)": TypedContractEvent<
+    "ManufacturerToDistributor(address,address,uint256[],uint256)": TypedContractEvent<
       ManufacturerToDistributorEvent.InputTuple,
       ManufacturerToDistributorEvent.OutputTuple,
       ManufacturerToDistributorEvent.OutputObject
