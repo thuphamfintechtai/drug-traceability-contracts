@@ -106,7 +106,7 @@ export interface MyNFTInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "mintNFT",
-    values: [BigNumberish[], BigNumberish[]]
+    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "safeBatchTransferFrom",
@@ -433,11 +433,7 @@ export interface MyNFT extends BaseContract {
     "nonpayable"
   >;
 
-  mintNFT: TypedContractMethod<
-    [ids: BigNumberish[], amount: BigNumberish[]],
-    [void],
-    "nonpayable"
-  >;
+  mintNFT: TypedContractMethod<[amounts: BigNumberish[]], [void], "nonpayable">;
 
   safeBatchTransferFrom: TypedContractMethod<
     [
@@ -552,11 +548,7 @@ export interface MyNFT extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "mintNFT"
-  ): TypedContractMethod<
-    [ids: BigNumberish[], amount: BigNumberish[]],
-    [void],
-    "nonpayable"
-  >;
+  ): TypedContractMethod<[amounts: BigNumberish[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "safeBatchTransferFrom"
   ): TypedContractMethod<

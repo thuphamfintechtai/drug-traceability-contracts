@@ -9,6 +9,8 @@ contract MyNFT is ERC1155 {
 
     accessControlService public accessControlServiceObj;
 
+    uint256 private _nextTokenId = 1;
+
     mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
 
     event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint256[] tokenIds, uint receivedTimestamp);
@@ -32,15 +34,31 @@ contract MyNFT is ERC1155 {
         setURI(_uri);
     }
 
+
+
     /*                  NFT MINTER               */
 
     function mintNFT(
-        uint256[] memory ids,
-        uint256[] memory amount
+        uint256[] memory amounts
     ) public {
         require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer can mint");
-        _mintBatch(msg.sender, ids, amount, "");
-        emit mintNFTEvent(msg.sender, ids);
+
+        uint256 numToMint = amounts.length; 
+        require(numToMint > 0, "Amount array cannot be empty");
+
+        uint256 currentId = _nextTokenId; 
+
+        uint256[] memory newIds = new uint256[](numToMint);
+
+        for(uint256 i = 0; i < numToMint; i++) {
+            newIds[i] = currentId + i;
+        }
+
+        _mintBatch(msg.sender, newIds, amounts, "");
+
+        _nextTokenId = currentId + numToMint;
+        
+        emit mintNFTEvent(msg.sender, newIds);
     }
 
 
@@ -73,6 +91,8 @@ contract MyNFT is ERC1155 {
             amount,
             ""
         );
+        uint timeSpan = block.timestamp;
+
 
         bytes32 fromRole = accessControlServiceObj.MANUFACTURER_ROLE();
         bytes32 toRole = accessControlServiceObj.DISTRIBUTOR_ROLE();
@@ -80,12 +100,12 @@ contract MyNFT is ERC1155 {
         for (uint i = 0; i < tokenIds.length; i++) {
             if (amount[i] > 0) { 
                 tokenIdTravelInfos[tokenIds[i]].push(AddressTracking(
-                    fromRole, toRole, msg.sender, distributorAddress, block.timestamp
+                    fromRole, toRole, msg.sender, distributorAddress, timeSpan
                 ));
             }
         }
 
-        emit ManufacturerToDistributor(msg.sender, distributorAddress, tokenIds, block.timestamp);
+        emit ManufacturerToDistributor(msg.sender, distributorAddress, tokenIds, timeSpan);
     }
 
 
@@ -115,18 +135,21 @@ contract MyNFT is ERC1155 {
             ""
         );
 
+        uint timeSpan = block.timestamp;
+
+
         bytes32 fromRole = accessControlServiceObj.DISTRIBUTOR_ROLE();
         bytes32 toRole = accessControlServiceObj.PHARMACY_ROLE();
 
         for (uint i = 0; i < tokenIds.length; i++) {
             if (amount[i] > 0) {
                 tokenIdTravelInfos[tokenIds[i]].push(AddressTracking(
-                    fromRole, toRole, msg.sender, pharmaAddress, block.timestamp
+                    fromRole, toRole, msg.sender, pharmaAddress, timeSpan
                 ));
             }
         }
 
-        emit DistributorToPharmacy(msg.sender, pharmaAddress, tokenIds, block.timestamp);
+        emit DistributorToPharmacy(msg.sender, pharmaAddress, tokenIds, timeSpan);
     }
 
     /*          THIS IS A OLD FUNCION OF BUSSNIESS LEVEL            */
