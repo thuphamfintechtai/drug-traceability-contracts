@@ -18,4 +18,10 @@ struct AddressTracking{
     uint recivedtimeSpan;
 }
 
+struct allRoleBaseStruct{
+    bool isActive;
+    string taxCode;
+    string licenseNo;
+}
+
 

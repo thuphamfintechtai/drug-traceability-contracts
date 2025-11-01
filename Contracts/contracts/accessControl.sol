@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNKNOWN
 pragma solidity ^0.8.2;
-
+import "./libraries/structsLibrary.sol";
 contract accessControlService {
 
     /*          ADDRESS             */
@@ -26,10 +26,8 @@ contract accessControlService {
     event PermissionGranted(address indexed granter, address indexed receiver, bytes32 indexed role);
     event PermissionRevoked(address indexed granter, address indexed receiver, bytes32 indexed role);
 
-    event RelationshipRequested(address indexed requester, address indexed approver, bytes32 relationshipType);
-    event RelationshipApproved(address indexed approver, address indexed requester, bytes32 relationshipType);
-    event RelationshipRejected(address indexed party1, address indexed party2, bytes32 relationshipType);
-    event RelationshipRemoved(address indexed remover, address indexed otherParty, bytes32 relationshipType);
+    event regrantPermisson(address indexed granter, address indexed receiver, bytes32 indexed role);
+
 
     bytes32 public constant MANUFACTURER_ROLE = keccak256("MANUFACTURER_ROLE");
     bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
@@ -40,29 +38,24 @@ contract accessControlService {
 
 
 
-    mapping(address => bool) public isManufacturer;
-    mapping(address => bool) public isDistributor;
-    mapping(address => bool) public isPharmacy;
-
-    mapping(address => mapping(address => ApprovalStatus)) public manufacturerDistributorStatus;
-
-    mapping(address => mapping(address => ApprovalStatus)) public distributorPharmacyStatus;
-
+    mapping(address => allRoleBaseStruct) public isManufacturer;
+    mapping(address => allRoleBaseStruct) public isDistributor;
+    mapping(address => allRoleBaseStruct) public isPharmacy;
 
     /*          MODIFIER             */
 
     modifier onlyManufacturer {
-        require(isManufacturer[msg.sender], "Invalid Role: Only Manufacturer can call this");
+        require(isManufacturer[msg.sender].isActive, "Invalid Role: Only Manufacturer can call this");
         _;
     }
 
     modifier onlyDistributor {
-        require(isDistributor[msg.sender], "Invalid Role: Only Distributor can call this");
+        require(isDistributor[msg.sender].isActive, "Invalid Role: Only Distributor can call this");
         _;
     }
 
     modifier onlyPharmacy {
-        require(isPharmacy[msg.sender], "Invalid Role: Only Pharmacy can call this");
+        require(isPharmacy[msg.sender].isActive, "Invalid Role: Only Pharmacy can call this");
         _;
     }
 
@@ -71,147 +64,91 @@ contract accessControlService {
         _;
     }
 
-    /*      PERMISSIONS FUNCTIONS       */
+    /*          PERMISSIONS FUNCTIONS           */
 
-    function addManufacturer(address _manufacturer) public onlyOwner {
-        require(!isManufacturer[_manufacturer], "Address is already a Manufacturer");
-        isManufacturer[_manufacturer] = true;
+    function addManufacturer(address _manufacturer , 
+    string memory taxCode ,
+    string memory lisenceNo) public onlyOwner {
+        require(!isManufacturer[_manufacturer].isActive, "Address is already a Manufacturer");
+        isManufacturer[_manufacturer] = allRoleBaseStruct(
+            true ,
+            taxCode ,
+            lisenceNo
+        );
+        
         emit PermissionGranted(msg.sender, _manufacturer, MANUFACTURER_ROLE);
     }
 
-    function addPharmacy(address _pharmacy) public onlyOwner {
-        require(!isPharmacy[_pharmacy], "Address is already a Pharmacy");
-        isPharmacy[_pharmacy] = true;
+    function addPharmacy(address _pharmacy ,
+    string memory taxCode ,
+    string memory lisenceNo) public onlyOwner {
+        require(!isPharmacy[_pharmacy].isActive, "Address is already a Pharmacy");
+        isPharmacy[_pharmacy] = allRoleBaseStruct(
+            true,
+            taxCode,
+            lisenceNo
+        );
         emit PermissionGranted(msg.sender, _pharmacy, PHARMACY_ROLE);
     }
 
-    function addDistributor(address _distributor) public onlyOwner {
-        require(!isDistributor[_distributor], "Address is already a Distributor");
-        isDistributor[_distributor] = true;
+    function addDistributor(address _distributor
+    , string memory taxCode ,
+    string memory lisenceNo) public onlyOwner {
+        require(!isDistributor[_distributor].isActive, "Address is already a Distributor");
+        isDistributor[_distributor] = allRoleBaseStruct(
+            true ,
+            taxCode,
+            lisenceNo
+        );
         emit PermissionGranted(msg.sender, _distributor, DISTRIBUTOR_ROLE);
     }
 
+    /*          ReGrant Roles         */
+
+    function regrantManufacture(address _manufacturer) public onlyOwner {
+        require(!isManufacturer[_manufacturer].isActive, "Manufacture Address is already granted");
+        isManufacturer[_manufacturer].isActive = true;
+        
+        emit regrantPermisson(msg.sender, _manufacturer, MANUFACTURER_ROLE);
+    }
+
+    function regrantPharmacy(address _pharmacy) public onlyOwner {
+        require(!isPharmacy[_pharmacy].isActive, "Pharmacy Address is already granted");
+        isPharmacy[_pharmacy].isActive = true;
+
+        emit regrantPermisson(msg.sender, _pharmacy, PHARMACY_ROLE);
+    }
+
+    function regrantDistributor(address _distributor
+    , string memory taxCode ,
+    string memory lisenceNo) public onlyOwner {
+        require(!isDistributor[_distributor].isActive, "Distributor Address is already granted");
+        isDistributor[_distributor] = allRoleBaseStruct(
+            true ,
+            taxCode,
+            lisenceNo
+        );
+        emit regrantPermisson(msg.sender, _distributor, DISTRIBUTOR_ROLE);
+    }
+
+    /*              Remove Roles                */
+
     function removeManufacturer(address _manufacturer) public onlyOwner {
-        require(isManufacturer[_manufacturer], "Address is not a Manufacturer");
-        isManufacturer[_manufacturer] = false;
+        require(isManufacturer[_manufacturer].isActive, "Address is not a Manufacturer");
+        isManufacturer[_manufacturer].isActive = false;
         emit PermissionRevoked(msg.sender, _manufacturer, MANUFACTURER_ROLE);
     }
 
     function removePharmacy(address _pharmacy) public onlyOwner {
-        require(isPharmacy[_pharmacy], "Address is not a Pharmacy");
-        isPharmacy[_pharmacy] = false;
+        require(isPharmacy[_pharmacy].isActive, "Address is not a Pharmacy");
+        isPharmacy[_pharmacy].isActive = false;
         emit PermissionRevoked(msg.sender, _pharmacy, PHARMACY_ROLE);
     }
 
     function removeDistributor(address _distributor) public onlyOwner {
-        require(isDistributor[_distributor], "Address is not a Distributor");
-        isDistributor[_distributor] = false;
+        require(isDistributor[_distributor].isActive, "Address is not a Distributor");
+        isDistributor[_distributor].isActive = false;
         emit PermissionRevoked(msg.sender, _distributor, DISTRIBUTOR_ROLE);
-    }
-
-    /*         UTHORITIES FUNCTIONS            */
-
-
-
-    function manufacturerRequestDistributor(address _distributor) public onlyManufacturer {
-        require(isDistributor[_distributor], "Target is not a Distributor");
-        require(manufacturerDistributorStatus[msg.sender][_distributor] == ApprovalStatus.NONE, "Request already exists");
-        
-        manufacturerDistributorStatus[msg.sender][_distributor] = ApprovalStatus.PENDING;
-        emit RelationshipRequested(msg.sender, _distributor, MANU_DIST_RELATION);
-    }
-
-    function distributorRequestManufacturer(address _manufacturer) public onlyDistributor {
-        require(isManufacturer[_manufacturer], "Target is not a Manufacturer");
-        require(manufacturerDistributorStatus[_manufacturer][msg.sender] == ApprovalStatus.NONE, "Request already exists");
-
-        manufacturerDistributorStatus[_manufacturer][msg.sender] = ApprovalStatus.PENDING;
-        emit RelationshipRequested(msg.sender, _manufacturer, MANU_DIST_RELATION);
-    }
-
-    function manufacturerApproveDistributor(address _distributor) public onlyManufacturer {
-        require(manufacturerDistributorStatus[msg.sender][_distributor] == ApprovalStatus.PENDING, "No pending request");
-        
-        manufacturerDistributorStatus[msg.sender][_distributor] = ApprovalStatus.APPROVED;
-        emit RelationshipApproved(msg.sender, _distributor, MANU_DIST_RELATION);
-    }
-
-    function distributorApproveManufacturer(address _manufacturer) public onlyDistributor {
-        require(manufacturerDistributorStatus[_manufacturer][msg.sender] == ApprovalStatus.PENDING, "No pending request");
-
-        manufacturerDistributorStatus[_manufacturer][msg.sender] = ApprovalStatus.APPROVED;
-        emit RelationshipApproved(msg.sender, _manufacturer, MANU_DIST_RELATION);
-    }
-
-    function removeManufacturerDistributorLink(address _otherParty) public {
-        ApprovalStatus status1 = manufacturerDistributorStatus[msg.sender][_otherParty];
-        ApprovalStatus status2 = manufacturerDistributorStatus[_otherParty][msg.sender];
-
-        require(isManufacturer[msg.sender] || isDistributor[msg.sender], "Not authorized");
-        
-        require(isManufacturer[_otherParty] || isDistributor[_otherParty], "Invalid target");
-
-        require(status1 != ApprovalStatus.NONE || status2 != ApprovalStatus.NONE, "No relationship exists");
-
-        if (status1 != ApprovalStatus.NONE) {
-            manufacturerDistributorStatus[msg.sender][_otherParty] = ApprovalStatus.NONE;
-        }
-        if (status2 != ApprovalStatus.NONE) {
-            manufacturerDistributorStatus[_otherParty][msg.sender] = ApprovalStatus.NONE;
-        }
-
-        emit RelationshipRemoved(msg.sender, _otherParty, MANU_DIST_RELATION);
-    }
-
-
-    // --- Distributor <-> Pharmacy  ---
-
-    function distributorRequestPharmacy(address _pharmacy) public onlyDistributor {
-        require(isPharmacy[_pharmacy], "Target is not a Pharmacy");
-        require(distributorPharmacyStatus[msg.sender][_pharmacy] == ApprovalStatus.NONE, "Request already exists");
-        
-        distributorPharmacyStatus[msg.sender][_pharmacy] = ApprovalStatus.PENDING;
-        emit RelationshipRequested(msg.sender, _pharmacy, DIST_PHAR_RELATION);
-    }
-
-    function pharmacyRequestDistributor(address _distributor) public onlyPharmacy {
-        require(isDistributor[_distributor], "Target is not a Distributor");
-        require(distributorPharmacyStatus[_distributor][msg.sender] == ApprovalStatus.NONE, "Request already exists");
-
-        distributorPharmacyStatus[_distributor][msg.sender] = ApprovalStatus.PENDING;
-        emit RelationshipRequested(msg.sender, _distributor, DIST_PHAR_RELATION);
-    }
-
-    function distributorApprovePharmacy(address _pharmacy) public onlyDistributor {
-        require(distributorPharmacyStatus[msg.sender][_pharmacy] == ApprovalStatus.PENDING, "No pending request");
-
-        distributorPharmacyStatus[msg.sender][_pharmacy] = ApprovalStatus.APPROVED;
-        emit RelationshipApproved(msg.sender, _pharmacy, DIST_PHAR_RELATION);
-    }
-
-    function pharmacyApproveDistributor(address _distributor) public onlyPharmacy {
-        require(distributorPharmacyStatus[_distributor][msg.sender] == ApprovalStatus.PENDING, "No pending request");
-
-        distributorPharmacyStatus[_distributor][msg.sender] = ApprovalStatus.APPROVED;
-        emit RelationshipApproved(msg.sender, _distributor, DIST_PHAR_RELATION);
-    }
-
-    function removeDistributorPharmacyLink(address _otherParty) public {
-        ApprovalStatus status1 = distributorPharmacyStatus[msg.sender][_otherParty];
-        ApprovalStatus status2 = distributorPharmacyStatus[_otherParty][msg.sender];
-
-        require(isDistributor[msg.sender] || isPharmacy[msg.sender], "Not authorized");
-        require(isDistributor[_otherParty] || isPharmacy[_otherParty], "Invalid target");
-        require(status1 != ApprovalStatus.NONE || status2 != ApprovalStatus.NONE, "No relationship exists");
-
-        if (status1 != ApprovalStatus.NONE) {
-            distributorPharmacyStatus[msg.sender][_otherParty] = ApprovalStatus.NONE;
-        }
-        if (status2 != ApprovalStatus.NONE) {
-            distributorPharmacyStatus[_otherParty][msg.sender] = ApprovalStatus.NONE;
-        }
-        
-        emit RelationshipRemoved(msg.sender, _otherParty, DIST_PHAR_RELATION);
     }
 
 
@@ -222,26 +159,34 @@ contract accessControlService {
     }
 
     function checkIsDistributor(address _distributorAddress) public view returns (bool) {
-        return isDistributor[_distributorAddress];
+        return isDistributor[_distributorAddress].isActive;
     }
 
     function checkIsPharmacy(address _pharmacyAddress) public view returns (bool) {
-        return isPharmacy[_pharmacyAddress];
+        return isPharmacy[_pharmacyAddress].isActive;
     }
 
     function checkIsManufacturer(address _manufacturerAddress) public view returns (bool) {
+        return isManufacturer[_manufacturerAddress].isActive;
+    }
+
+    /*          GET FUNCTIONS         */
+
+    function getManufacture(address _manufacturerAddress) public view returns(allRoleBaseStruct memory)
+    {
+        require(isManufacturer[_manufacturerAddress].isActive , "Role is not Valid");
         return isManufacturer[_manufacturerAddress];
     }
 
-    function isManufacturerDistributorApproved(address _manufacturer, address _distributor) public view returns (bool) {
-        bool direction1 = (manufacturerDistributorStatus[_manufacturer][_distributor] == ApprovalStatus.APPROVED);
-        bool direction2 = (manufacturerDistributorStatus[_distributor][_manufacturer] == ApprovalStatus.APPROVED);
-        return direction1 || direction2;
+    function getDistributor(address _distributorAddress) public view returns(allRoleBaseStruct memory)
+    {
+        require(isDistributor[_distributorAddress].isActive , "Role is not Valid");
+        return isDistributor[_distributorAddress];
     }
 
-    function isDistributorPharmacyApproved(address _distributor, address _pharmacy) public view returns (bool) {
-        bool direction1 = (distributorPharmacyStatus[_distributor][_pharmacy] == ApprovalStatus.APPROVED);
-        bool direction2 = (distributorPharmacyStatus[_pharmacy][_distributor] == ApprovalStatus.APPROVED);
-        return direction1 || direction2;
+    function getPharma(address _pharmaAddress) public view returns(allRoleBaseStruct memory)
+    {
+        require(isPharmacy[_pharmaAddress].isActive , "Role is not Valid");
+        return isPharmacy[_pharmaAddress];
     }
 }

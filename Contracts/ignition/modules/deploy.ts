@@ -8,7 +8,9 @@ const deployedContract = buildModule("DeployModule", (m) => {
   // Deploy Access Control Contract First
   const accessControlContract = m.contract("accessControlService")
 
-  const myNFTContract = m.contract("MyNFT" , [accessControlContract])
+  const myNFTContract = m.contract("MyNFT" , [accessControlContract , 
+    "IPFS//"
+  ])
   return { accessControlContract , myNFTContract }
 });
 

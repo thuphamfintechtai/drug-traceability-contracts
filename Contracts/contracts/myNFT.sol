@@ -1,123 +1,216 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./accessControl.sol";
 import "./libraries/structsLibrary.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-contract MyNFT is ERC721URIStorage {
+contract MyNFT is ERC1155 {
 
-    /* ACCESS CONTROL SERVICE VARIABLE      */
     accessControlService public accessControlServiceObj;
 
+    mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
 
+    event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint256[] tokenIds, uint receivedTimestamp);
+    event DistributorToPharmacy(address indexed distributorAddress, address indexed pharmacyAddress, uint256[] tokenIds, uint receivedTimestamp);
+    event mintNFTEvent(address indexed manufactureAddress, uint256[] tokenIds);
 
-    constructor(address _accessControlAddress) ERC721("MyNFT", "NFT") {
+    constructor(
+        address _accessControlAddress,
+        string memory _uri
+    ) 
+        ERC1155(_uri) 
+    {
         require(_accessControlAddress != address(0), "Invalid access control address");
         accessControlServiceObj = accessControlService(_accessControlAddress);
     }
 
+    /*               Hàm set lại URI                */
 
-    event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint []indexed tokenId, uint receivedTimestamp);
-    event DistributorToPharmacy(address indexed distributorAddress, address indexed pharmacyAddress, uint [] indexed tokenId, uint receivedTimestamp);
+    function setURI(string memory _uri) public{
+        require(accessControlServiceObj.isAdmin(msg.sender), "You Must be Admin to do this function");
+        setURI(_uri);
+    }
 
+    /*                  NFT MINTER               */
 
-    /*   VARIABLES        */
-
-    uint256 private _tokenIds;
-
-
-
-    /*          MAPPINGS            */
-
-    mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
-
-    // Return A List Of IDs
-
-    function mintNFT(string [] memory tokenURIs)
-        public
-        returns (uint256 [] memory)
-    {
-        uint256 [] memory tokenIds = new uint256[](tokenURIs.length);
-
+    function mintNFT(
+        uint256[] memory ids,
+        uint256[] memory amount
+    ) public {
         require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer can mint");
-
-        for(uint256 tokenURIIndex = 0 ; tokenURIIndex < tokenURIs.length;tokenURIIndex++)
-        {
-            _tokenIds++;
-            uint256 newItemId = _tokenIds;
-            _mint(msg.sender, newItemId);
-            _setTokenURI(newItemId, tokenURIs[tokenURIIndex]);
-
-            // Push into a array
-
-            tokenIds[tokenURIIndex] = newItemId;
-        }
-
-        return tokenIds;
+        _mintBatch(msg.sender, ids, amount, "");
+        emit mintNFTEvent(msg.sender, ids);
     }
 
 
-    /*          TRANSFER TOKENID MANUFACTURER TO DISTRIBUTOR         */
-
-    function manufacturerToDistributor(
-        uint256 [] memory tokenId,
+    function manufacturerTransferToDistributor(
+        uint256[] memory tokenIds,
+        uint256[] memory amount,
         address distributorAddress
     ) public {
-        require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer");
-        require(accessControlServiceObj.checkIsDistributor(distributorAddress), "Invalid Target: Target is not a Distributor");
-        require(
-            accessControlServiceObj.isManufacturerDistributorApproved(msg.sender, distributorAddress),
-            "Authority Not Approved: This relationship has not been approved by both parties"
+        
+        // --- 1. Kiểm tra vai trò ---
+        require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Caller is not a Manufacturer");
+        require(accessControlServiceObj.checkIsDistributor(distributorAddress), "Receiver is not a Distributor");
+
+
+        address[] memory owners = new address[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            owners[i] = msg.sender;
+        }
+
+        uint256[] memory balances = balanceOfBatch(owners, tokenIds);
+
+        for (uint256 i = 0; i < balances.length; i++) {
+            require(balances[i] >= amount[i], "Manufacturer: insufficient balance");
+        }
+
+        safeBatchTransferFrom(
+            msg.sender,
+            distributorAddress,
+            tokenIds,
+            amount,
+            ""
         );
 
-        for(uint256 i = 0;i<tokenId.length;i++)
-        {
-            require(ownerOf(tokenId[i]) == msg.sender, "ERC721: transfer from incorrect owner");
+        bytes32 fromRole = accessControlServiceObj.MANUFACTURER_ROLE();
+        bytes32 toRole = accessControlServiceObj.DISTRIBUTOR_ROLE();
+
+        for (uint i = 0; i < tokenIds.length; i++) {
+            if (amount[i] > 0) { 
+                tokenIdTravelInfos[tokenIds[i]].push(AddressTracking(
+                    fromRole, toRole, msg.sender, distributorAddress, block.timestamp
+                ));
+            }
         }
 
-        for(uint256 tokenIdValue = 0;tokenIdValue < tokenId.length;tokenIdValue++)
-        {
-            tokenIdTravelInfos[tokenId[tokenIdValue]].push(AddressTracking(
-                accessControlServiceObj.MANUFACTURER_ROLE(),
-                accessControlServiceObj.DISTRIBUTOR_ROLE(),
-                msg.sender,
-                distributorAddress,
-                block.timestamp
-            ));
-        }
-    
-        emit ManufacturerToDistributor(msg.sender, distributorAddress, tokenId, block.timestamp);
+        emit ManufacturerToDistributor(msg.sender, distributorAddress, tokenIds, block.timestamp);
     }
 
-    /*            TRANSFER TOKENID DISTRIBUTOR TO PHARMACY                  */
 
-    function distributorToPharmacy(
-        uint256 [] memory tokenId,
-        address pharmacyAddress
+    function distributorTransferToPharmacy(
+        address pharmaAddress,
+        uint256[] memory tokenIds,
+        uint256[] memory amount
     ) public {
-        require(accessControlServiceObj.checkIsDistributor(msg.sender), "Invalid Role: Only Distributor");
+        
+        require(accessControlServiceObj.checkIsDistributor(msg.sender), "Caller is not a Distributor");
+        require(accessControlServiceObj.checkIsPharmacy(pharmaAddress), "Receiver is not a Pharmacy");
 
-        require(accessControlServiceObj.checkIsPharmacy(pharmacyAddress), "Invalid Target: Target is not a Pharmacy");
-
-        require(
-            accessControlServiceObj.isDistributorPharmacyApproved(msg.sender, pharmacyAddress),
-            "Authority Not Approved: This relationship has not been approved by both parties"
-        );
-
-        for(uint tokenIndexValue =0;tokenIndexValue < tokenId.length;tokenIndexValue++)
-        {
-            tokenIdTravelInfos[tokenId[tokenIndexValue]].push(AddressTracking(
-                accessControlServiceObj.DISTRIBUTOR_ROLE(),
-                accessControlServiceObj.PHARMACY_ROLE(),
-                msg.sender,
-                pharmacyAddress,
-                block.timestamp
-            ));
+        address[] memory owners = new address[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            owners[i] = msg.sender;
+        }
+        uint256[] memory balances = balanceOfBatch(owners, tokenIds);
+        for (uint256 i = 0; i < balances.length; i++) {
+            require(balances[i] >= amount[i], "Distributor: insufficient balance");
         }
 
-        emit DistributorToPharmacy(msg.sender, pharmacyAddress, tokenId, block.timestamp);
+        safeBatchTransferFrom(
+            msg.sender,
+            pharmaAddress,
+            tokenIds,
+            amount,
+            ""
+        );
+
+        bytes32 fromRole = accessControlServiceObj.DISTRIBUTOR_ROLE();
+        bytes32 toRole = accessControlServiceObj.PHARMACY_ROLE();
+
+        for (uint i = 0; i < tokenIds.length; i++) {
+            if (amount[i] > 0) {
+                tokenIdTravelInfos[tokenIds[i]].push(AddressTracking(
+                    fromRole, toRole, msg.sender, pharmaAddress, block.timestamp
+                ));
+            }
+        }
+
+        emit DistributorToPharmacy(msg.sender, pharmaAddress, tokenIds, block.timestamp);
     }
+
+    /*          THIS IS A OLD FUNCION OF BUSSNIESS LEVEL            */
+
+
+            /*          Distributor confirm the NFT Transfer         */
+
+    // function distributorConfirmTheNFT(
+    //     address pharmaAddress ,
+    //     uint [] memory tokenIds ,
+    //     uint [] amount
+    // ) public
+    // {
+    //     // Trước tiên kiểm tra xem coi Distributor có tồn tại trên hệ thống hay không
+
+    //     require(accessControlServiceObj.checkIsDistributor(msg.sender) , "Distributor address is Invalid");
+
+    //     require(accessControlServiceObj.checkIsDistributor(pharmaAddress) , "Pharma address is Invalid");
+
+    //     for(uint256 index =0;index < tokenIds.length; index++)
+    //     {
+    //         // Tiến hành kiểm tra xem token có thực sự thuộc về manufacture hay không
+    //         require(
+    //             _ownerOf(tokenIds[index]) == pharmaAddress , "Token Is not Belong to this manufacture"
+    //         );
+
+    //         // Sau Khi lamf phaanf này tiếp tục ghi lên smart contract
+
+    //         tokenIdTravelInfos[tokenIds[index]].push(AddressTracking(
+    //             accessControlServiceObj.MANUFACTURER_ROLE(),
+    //             accessControlServiceObj.DISTRIBUTOR_ROLE(),
+    //             manufactureAddress,
+    //             msg.sender,
+    //             block.timestamp
+    //         ));
+    //     }
+
+    //     emit ManufacturerToDistributor(manufactureAddress, msg.sender, tokenIds, block.timestamp);
+    // }
+
+            /*      Pharma confirm the NFT Transfer         */
+
+    // function pharmaConfirmTheNFTTransfer(
+    //     address distributorAddress ,
+    //     uint [] memory tokenIds
+    // ) public
+    // {
+    //     // Trước tiên kiểm tra xem coi Distributor có tồn tại trên hệ thống hay không
+
+    //     require(accessControlServiceObj.checkIsDistributor(distributorAddress) , "Distributor address is Invalid");
+
+    //     require(accessControlServiceObj.checkIsPharmacy(msg.sender) , "Pharmacy address is Invalid");
+
+    //     for(uint256 index =0;index < tokenIds.length; index++)
+    //     {
+    //         // Tiến hành duyệt qua mảng vào tìm kiếm NFTs
+
+    //         AddressTracking [] memory getTheNFTAddressTracking 
+    //             = tokenIdTravelInfos[tokenIds[index]];
+
+    //         // Tiến hành tìm vị trí cuối trong mảng
+
+    //         AddressTracking memory getTheLastIndex = 
+    //             getTheNFTAddressTracking[getTheNFTAddressTracking.length - 1];
+
+    //         // Tiến hành tìm kiếm thông tin distributor có thật sự nằm trong chuỗi cung ứng hay không 
+
+    //         require(getTheLastIndex
+    //         .toUserType == accessControlServiceObj.DISTRIBUTOR_ROLE()
+    //         && 
+    //         getTheLastIndex.toUserAddress == distributorAddress , "Invalid Distributor , Distributor does not exits");
+
+    //         tokenIdTravelInfos[tokenIds[index]].push(AddressTracking(
+    //             accessControlServiceObj.DISTRIBUTOR_ROLE(),
+    //             accessControlServiceObj.PHARMACY_ROLE(),
+    //             distributorAddress,
+    //             msg.sender,
+    //             block.timestamp
+    //         ));
+    //     }
+
+    //     emit DistributorToPharmacy(distributorAddress, msg.sender, tokenIds, block.timestamp);
+    // }
+
 
     function getTrackingHistory(uint256 tokenId) 
         public 
