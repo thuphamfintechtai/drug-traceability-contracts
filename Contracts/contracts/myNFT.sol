@@ -13,9 +13,23 @@ contract MyNFT is ERC1155 {
 
     mapping(uint256 => AddressTracking[]) public tokenIdTravelInfos;
 
+    mapping(address => mapping(address => bool)) distributorPharmacyContract;
+
     event ManufacturerToDistributor(address indexed manufacturerAddress, address indexed distributorAddress, uint256[] tokenIds, uint receivedTimestamp);
     event DistributorToPharmacy(address indexed distributorAddress, address indexed pharmacyAddress, uint256[] tokenIds, uint receivedTimestamp);
     event mintNFTEvent(address indexed manufactureAddress, uint256[] tokenIds);
+
+    /*          CONTRACT EVENTS             */
+
+    event distributorSignTheContractEvent(address indexed distributorAddress , address indexed pharmacyAddress , uint timespan);
+
+    event pharmacySignTheContractEvent(address indexed pharmacyAddress , address indexed distributorAddress , uint timespan);
+
+
+    /*         NFT MINTER           */
+
+    event distributorMintNFTEvent(address indexed distributorAddress , uint tokenId , uint timespan);
+
 
     constructor(
         address _accessControlAddress,
@@ -31,9 +45,61 @@ contract MyNFT is ERC1155 {
 
     function setURI(string memory _uri) public{
         require(accessControlServiceObj.isAdmin(msg.sender), "You Must be Admin to do this function");
-        setURI(_uri);
+        _setURI(_uri);
     }
 
+
+    /*      Contract Service    */
+
+    function distributorCreateAContract(address pharmacyAddress) public
+    {
+        require(accessControlServiceObj.checkIsDistributor(msg.sender) , "Address is not a distributor");
+        require(accessControlServiceObj.checkIsPharmacy(pharmacyAddress) , "Address is not a Pharmacy");
+
+        require(!distributorPharmacyContract[msg.sender][pharmacyAddress],"The Contract Is Already Signed (Distributor Func)");
+
+        // Adding the contract Info 
+
+        distributorPharmacyContract[msg.sender][pharmacyAddress] = false;
+
+        emit distributorSignTheContractEvent(msg.sender , pharmacyAddress , block.timestamp);
+    }
+
+    function pharmacyConfirmTheContract(address distributorAddress) public {
+
+        require(accessControlServiceObj.checkIsDistributor(distributorAddress) , "Address is not a distributor");
+        require(accessControlServiceObj.checkIsPharmacy(msg.sender) , "Address is not a Pharmacy");
+
+        require(!distributorPharmacyContract[distributorAddress][msg.sender],"The Contract Is Already Signed (Pharmacy Func)");
+
+        distributorPharmacyContract[distributorAddress][msg.sender] = true;
+
+        emit pharmacySignTheContractEvent(msg.sender , distributorAddress , block.timestamp);
+    }
+
+
+    /*                   Distributor Mint                      */
+    // Chú thích
+    // Kiểm tra xem hợp đồng có thật sự được ký hay chưa
+
+    function distributorMintTheNFT(address pharmacyAddress) public{
+
+        require(accessControlServiceObj.checkIsDistributor(msg.sender) , "Address is not a distributor");
+
+        require(accessControlServiceObj.checkIsPharmacy(pharmacyAddress) , "Address is not a Pharmacy");
+
+        require(distributorPharmacyContract[msg.sender][pharmacyAddress] , "The Contract is not signed yet !");
+
+        // Mint NFT
+        uint tokenId = _nextTokenId;
+        _mint(msg.sender , tokenId , 1 , "");
+        _nextTokenId++;
+
+
+        emit distributorMintNFTEvent(msg.sender , tokenId , block.timestamp);
+
+
+    }
 
 
     /*                  NFT MINTER               */
@@ -116,7 +182,10 @@ contract MyNFT is ERC1155 {
     ) public {
         
         require(accessControlServiceObj.checkIsDistributor(msg.sender), "Caller is not a Distributor");
+
         require(accessControlServiceObj.checkIsPharmacy(pharmaAddress), "Receiver is not a Pharmacy");
+
+        require(distributorPharmacyContract[msg.sender][pharmaAddress] , "The Contract is not exist or not signed by 2 side yet !");
 
         address[] memory owners = new address[](tokenIds.length);
         for (uint256 i = 0; i < tokenIds.length; i++) {
@@ -241,5 +310,28 @@ contract MyNFT is ERC1155 {
         returns (AddressTracking[] memory) 
     {
         return tokenIdTravelInfos[tokenId];
+    }
+
+    function pharmacyGetContractInfoByDistributorAddress(address distributorAddress) public view returns(getContractInfoStruct memory) {
+
+        bool isSigned = distributorPharmacyContract[distributorAddress][msg.sender];
+
+        return getContractInfoStruct(
+            distributorAddress,
+            msg.sender,
+            isSigned ? "Signed" : "Not Signed"
+        );
+
+    }
+
+    function distributorGetContractByPharmacyAddress(address pharmacyAddress) public view returns(getContractInfoStruct memory){
+        bool isSigned = distributorPharmacyContract[msg.sender][pharmacyAddress];
+
+        return getContractInfoStruct(
+            msg.sender,
+            pharmacyAddress,
+            isSigned ? "Signed" : "Not Signed"
+        );
+
     }
 }

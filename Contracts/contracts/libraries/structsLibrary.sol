@@ -24,4 +24,10 @@ struct allRoleBaseStruct{
     string licenseNo;
 }
 
+struct getContractInfoStruct{
+    address distributorAddress;
+    address pharmacyAddress;
+    string contractStatus;
+}
+
 
