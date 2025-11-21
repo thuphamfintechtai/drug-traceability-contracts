@@ -68,13 +68,13 @@ export interface MyNFTInterface extends Interface {
       | "balanceOf"
       | "balanceOfBatch"
       | "distributorCreateAContract"
+      | "distributorFinalizeAndMint"
       | "distributorGetContractByPharmacyAddress"
-      | "distributorMintTheNFT"
+      | "distributorPharmacyContract"
       | "distributorTransferToPharmacy"
       | "getTrackingHistory"
       | "isApprovedForAll"
       | "manufacturerTransferToDistributor"
-      | "mintNFT"
       | "pharmacyConfirmTheContract"
       | "pharmacyGetContractInfoByDistributorAddress"
       | "safeBatchTransferFrom"
@@ -94,7 +94,7 @@ export interface MyNFTInterface extends Interface {
       | "TransferBatch"
       | "TransferSingle"
       | "URI"
-      | "distributorMintNFTEvent"
+      | "distributorFinalizeAndMintEvent"
       | "distributorSignTheContractEvent"
       | "mintNFTEvent"
       | "pharmacySignTheContractEvent"
@@ -117,12 +117,16 @@ export interface MyNFTInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "distributorFinalizeAndMint",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "distributorGetContractByPharmacyAddress",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "distributorMintTheNFT",
-    values: [AddressLike]
+    functionFragment: "distributorPharmacyContract",
+    values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "distributorTransferToPharmacy",
@@ -139,10 +143,6 @@ export interface MyNFTInterface extends Interface {
   encodeFunctionData(
     functionFragment: "manufacturerTransferToDistributor",
     values: [BigNumberish[], BigNumberish[], AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "mintNFT",
-    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "pharmacyConfirmTheContract",
@@ -195,11 +195,15 @@ export interface MyNFTInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "distributorFinalizeAndMint",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "distributorGetContractByPharmacyAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "distributorMintTheNFT",
+    functionFragment: "distributorPharmacyContract",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -218,7 +222,6 @@ export interface MyNFTInterface extends Interface {
     functionFragment: "manufacturerTransferToDistributor",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "mintNFT", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pharmacyConfirmTheContract",
     data: BytesLike
@@ -392,7 +395,7 @@ export namespace URIEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace distributorMintNFTEventEvent {
+export namespace distributorFinalizeAndMintEventEvent {
   export type InputTuple = [
     distributorAddress: AddressLike,
     tokenId: BigNumberish,
@@ -537,16 +540,22 @@ export interface MyNFT extends BaseContract {
     "nonpayable"
   >;
 
+  distributorFinalizeAndMint: TypedContractMethod<
+    [pharmacyAddress: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   distributorGetContractByPharmacyAddress: TypedContractMethod<
     [pharmacyAddress: AddressLike],
     [GetContractInfoStructStructOutput],
     "view"
   >;
 
-  distributorMintTheNFT: TypedContractMethod<
-    [pharmacyAddress: AddressLike],
-    [void],
-    "nonpayable"
+  distributorPharmacyContract: TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike],
+    [bigint],
+    "view"
   >;
 
   distributorTransferToPharmacy: TypedContractMethod<
@@ -580,8 +589,6 @@ export interface MyNFT extends BaseContract {
     [void],
     "nonpayable"
   >;
-
-  mintNFT: TypedContractMethod<[amounts: BigNumberish[]], [void], "nonpayable">;
 
   pharmacyConfirmTheContract: TypedContractMethod<
     [distributorAddress: AddressLike],
@@ -674,6 +681,9 @@ export interface MyNFT extends BaseContract {
     nameOrSignature: "distributorCreateAContract"
   ): TypedContractMethod<[pharmacyAddress: AddressLike], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "distributorFinalizeAndMint"
+  ): TypedContractMethod<[pharmacyAddress: AddressLike], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "distributorGetContractByPharmacyAddress"
   ): TypedContractMethod<
     [pharmacyAddress: AddressLike],
@@ -681,8 +691,12 @@ export interface MyNFT extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "distributorMintTheNFT"
-  ): TypedContractMethod<[pharmacyAddress: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "distributorPharmacyContract"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike],
+    [bigint],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "distributorTransferToPharmacy"
   ): TypedContractMethod<
@@ -719,9 +733,6 @@ export interface MyNFT extends BaseContract {
     [void],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "mintNFT"
-  ): TypedContractMethod<[amounts: BigNumberish[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "pharmacyConfirmTheContract"
   ): TypedContractMethod<
@@ -837,11 +848,11 @@ export interface MyNFT extends BaseContract {
     URIEvent.OutputObject
   >;
   getEvent(
-    key: "distributorMintNFTEvent"
+    key: "distributorFinalizeAndMintEvent"
   ): TypedContractEvent<
-    distributorMintNFTEventEvent.InputTuple,
-    distributorMintNFTEventEvent.OutputTuple,
-    distributorMintNFTEventEvent.OutputObject
+    distributorFinalizeAndMintEventEvent.InputTuple,
+    distributorFinalizeAndMintEventEvent.OutputTuple,
+    distributorFinalizeAndMintEventEvent.OutputObject
   >;
   getEvent(
     key: "distributorSignTheContractEvent"
@@ -932,15 +943,15 @@ export interface MyNFT extends BaseContract {
       URIEvent.OutputObject
     >;
 
-    "distributorMintNFTEvent(address,uint256,uint256)": TypedContractEvent<
-      distributorMintNFTEventEvent.InputTuple,
-      distributorMintNFTEventEvent.OutputTuple,
-      distributorMintNFTEventEvent.OutputObject
+    "distributorFinalizeAndMintEvent(address,uint256,uint256)": TypedContractEvent<
+      distributorFinalizeAndMintEventEvent.InputTuple,
+      distributorFinalizeAndMintEventEvent.OutputTuple,
+      distributorFinalizeAndMintEventEvent.OutputObject
     >;
-    distributorMintNFTEvent: TypedContractEvent<
-      distributorMintNFTEventEvent.InputTuple,
-      distributorMintNFTEventEvent.OutputTuple,
-      distributorMintNFTEventEvent.OutputObject
+    distributorFinalizeAndMintEvent: TypedContractEvent<
+      distributorFinalizeAndMintEventEvent.InputTuple,
+      distributorFinalizeAndMintEventEvent.OutputTuple,
+      distributorFinalizeAndMintEventEvent.OutputObject
     >;
 
     "distributorSignTheContractEvent(address,address,uint256)": TypedContractEvent<
