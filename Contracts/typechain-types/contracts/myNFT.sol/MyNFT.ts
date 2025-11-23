@@ -75,6 +75,7 @@ export interface MyNFTInterface extends Interface {
       | "getTrackingHistory"
       | "isApprovedForAll"
       | "manufacturerTransferToDistributor"
+      | "mintNFT"
       | "pharmacyConfirmTheContract"
       | "pharmacyGetContractInfoByDistributorAddress"
       | "safeBatchTransferFrom"
@@ -143,6 +144,10 @@ export interface MyNFTInterface extends Interface {
   encodeFunctionData(
     functionFragment: "manufacturerTransferToDistributor",
     values: [BigNumberish[], BigNumberish[], AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mintNFT",
+    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "pharmacyConfirmTheContract",
@@ -222,6 +227,7 @@ export interface MyNFTInterface extends Interface {
     functionFragment: "manufacturerTransferToDistributor",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "mintNFT", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pharmacyConfirmTheContract",
     data: BytesLike
@@ -590,6 +596,8 @@ export interface MyNFT extends BaseContract {
     "nonpayable"
   >;
 
+  mintNFT: TypedContractMethod<[amounts: BigNumberish[]], [void], "nonpayable">;
+
   pharmacyConfirmTheContract: TypedContractMethod<
     [distributorAddress: AddressLike],
     [void],
@@ -733,6 +741,9 @@ export interface MyNFT extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "mintNFT"
+  ): TypedContractMethod<[amounts: BigNumberish[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "pharmacyConfirmTheContract"
   ): TypedContractMethod<

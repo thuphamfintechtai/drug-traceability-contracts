@@ -98,6 +98,32 @@ contract MyNFT is ERC1155 {
         emit distributorFinalizeAndMintEvent(msg.sender , tokenId , block.timestamp);
     }
 
+      /*                  NFT MINTER               */
+
+    function mintNFT(
+        uint256[] memory amounts
+    ) public {
+        require(accessControlServiceObj.checkIsManufacturer(msg.sender), "Invalid Role: Only Manufacturer can mint");
+
+        uint256 numToMint = amounts.length; 
+        require(numToMint > 0, "Amount array cannot be empty");
+
+        uint256 currentId = _nextTokenId; 
+
+        uint256[] memory newIds = new uint256[](numToMint);
+
+        for(uint256 i = 0; i < numToMint; i++) {
+            newIds[i] = currentId + i;
+        }
+
+        _mintBatch(msg.sender, newIds, amounts, "");
+
+        _nextTokenId = currentId + numToMint;
+        
+        emit mintNFTEvent(msg.sender, newIds);
+    }
+
+
     function manufacturerTransferToDistributor(
         uint256[] memory tokenIds,
         uint256[] memory amount,
